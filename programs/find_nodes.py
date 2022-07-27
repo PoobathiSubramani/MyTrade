@@ -39,8 +39,15 @@ def findNodes(df, tolerancePct):
         dfSymbolBottoms = dfSymbol.loc[dfSymbol['isBottom']==True] # temp df for only the bottom nodes
         dfSymbolTops = dfSymbol.loc[dfSymbol['isTop']==True] # temp df for only the top nodes
         for index in dfSymbol.index:
+            
+            fibMax = dfSymbol['High'].max()
+            fibMin = dfSymbol['Low'].min()
+            fibDiff = fibMax - fibMin
+            fib100pct = fibMax
+            
+
             if not (dfSymbol.loc[index, 'isBottom']==True or dfSymbol.loc[index, 'isTop']==True):
-                continue
+                continue # skip the rows that are neither top not bottom
 
             if (dfSymbol.loc[index, 'isBottom']): #only for the bottom nodes
                 bottomLowLimit = dfSymbol.loc[index, 'Low'] * (1-tolerancePct/100)
@@ -61,7 +68,9 @@ def findNodes(df, tolerancePct):
                     dfSymbol.loc[index, 'startDate'] = startDate
                     dfSymbol.loc[index, 'endDate'] = endDate
                     dfSymbol.loc[index, 'age'] = (pd.to_datetime(today) - pd.to_datetime(endDate)).days  # find the age of end date from today
-                    
+                    dfSymbol.loc[index, 'duration'] = (endDate - startDate).days # find the duration of the span
+                    dfSymbol.loc[index, 'scoreBottoms'] = (dfSymbol.loc[index, 'similarBottoms']/dfSymbol.loc[index, 'age'])*dfSymbol.loc[index, 'duration'] # my own calc to decide the score
+                    #dfSymbol.loc[index, 'rankBottoms'] = dfSymbol['scoreBottoms'].rank(ascending = False)
 
                 similarBottoms = 0 # reset count  
                 dfTempBottom.drop(dfTempBottom.index, inplace=True) # drop the dataframe for the next iteration use 
@@ -83,6 +92,9 @@ def findNodes(df, tolerancePct):
                     dfSymbol.loc[index, 'startDate'] = startDate
                     dfSymbol.loc[index, 'endDate'] = endDate
                     dfSymbol.loc[index, 'age'] = (pd.to_datetime(today) - pd.to_datetime(endDate)).days # find the age of end date from today
+                    dfSymbol.loc[index, 'duration'] = (endDate - startDate).days # find the duration of the span
+                    dfSymbol.loc[index, 'scoreTops'] = (dfSymbol.loc[index, 'similarTops']/dfSymbol.loc[index, 'age'])*dfSymbol.loc[index, 'duration'] # my own calc to decide the score
+                    #dfSymbol.loc[index, 'rankTops'] = dfSymbol['scoreTops'].rank(ascending = False)
 
                 similarTops = 0 # reset count     
                 dfTempTop.drop(dfTempTop.index, inplace=True) # drop the dataframe for the next iteration use     

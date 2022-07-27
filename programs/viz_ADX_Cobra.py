@@ -22,7 +22,7 @@ def vizADXCobra(dfBase, dateWindow, dfSupportLines, dfResistanceLines, params):
     for symbol in dfBase['symbol'].unique(): # draw the chart for each symbol in the dataset
         dfSymbol = dfBase.loc[(dfBase['symbol']==symbol) & (dfBase['SMAhigh']>0)] # get the data for the symbol that is currently in loop
 
-        #latestHigh = dfSymbol['High'][dfSymbol.index[-1]]
+        latestHigh = dfSymbol['High'][dfSymbol.index[-1]] #the most recent high price
 
 
         candlesticks = go.Candlestick( # draw candlesticks
@@ -111,12 +111,19 @@ def vizADXCobra(dfBase, dateWindow, dfSupportLines, dfResistanceLines, params):
 
         # add resistance lines
         for index, row in dfResistanceLines.iterrows():
+            """
             if (row['rankTops'] <= 5): #consider the lines only within 20%
                 similarTops = int(row['similarTops'])
                 avgHigh = round(row['avgHigh'],2)
                 annotation_text = str(avgHigh) + ' with ' + str(similarTops) + ' times between ' + str(startDate) + ' and ' + str(endDate) + ' (' + str(row['rankTops']) + ')'
+                annotation_text = ''
                 fig.add_hline(y=avgHigh, row=1, col=1, annotation_text=annotation_text, annotation_position='top left', line_color='orange', line_width=1)
-        
+            """
+            avgHigh = round(row['avgHigh'],2)
+            if avgHigh <= (latestHigh*1.20): # ignore the lines that are 25% above the latest high
+                annotation_text=''
+                fig.add_hline(y=avgHigh, row=1, col=1, annotation_text=annotation_text, annotation_position='top left', line_color='orange', line_width=1)
+
         fig.update(layout_xaxis_rangeslider_visible=False) # to turn off the range slider at the bottom of the chart
 
         fig.show() # display the chart    

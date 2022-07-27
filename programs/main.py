@@ -36,7 +36,7 @@ endDate = dateWindow['endDate'] # resolved end date
 MADXCobraParams = {'emaTimePeriod':10, 'smaTimePeriod':72, 'adxTimePeriod': 10, 'adxLowerLimit':20, 'adxUpperLimit':50}
 
 # select the stocks list 
-symbols = ['DMART.NS']
+symbols = ['DMART.NS','ASIANPAINT.NS']
 # TATACOMM, ASIANPAINT, DMART
 
 dfRawTradeData = getTradedata(symbols=symbols, executionMode=executionMode, dataPath=dataPath, dateWindow=dateWindow)
@@ -44,12 +44,14 @@ print("Raw data collected:")
 print(dfRawTradeData.head(10))
 dfNodes = findNodes(dfRawTradeData, tolerancePct=tolerancePct)
 print("Data with nodes - the turning points from low to high or high to low")
-print(dfNodes.head(10))
-dfResistanceLines, dfSupportLines = getSRLines(df=dfNodes)
-print("Resistance and Support Line data")
-print(dfResistanceLines.head(10), dfSupportLines.head(10))
+print(dfNodes.sort_values(by=['symbol','scoreTops'], ascending=[True, False]).head(20))
+dfSupportLines, dfResistanceLines = getSRLines(df=dfNodes)
+print("Support Line data")
+print(dfSupportLines.head(10))
+print("Resistance Line data")
+print(dfResistanceLines.head(10))
 dfPattern = MADXCobra(dfRawTradeData, params=MADXCobraParams)
-print("Visualizing data...")
+print("Visualizing data... ")
 vizADXCobra(dfPattern, dateWindow=dateWindow, dfSupportLines=dfSupportLines, dfResistanceLines=dfResistanceLines, params=MADXCobraParams)
 
 
