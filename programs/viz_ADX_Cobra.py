@@ -23,6 +23,7 @@ def vizADXCobra(dfBase, dateWindow, dfSupportLines, dfResistanceLines, params):
         dfSymbol = dfBase.loc[(dfBase['symbol']==symbol) & (dfBase['SMAhigh']>0)] # get the data for the symbol that is currently in loop
 
         latestHigh = dfSymbol['High'][dfSymbol.index[-1]] #the most recent high price
+        latestLow = dfSymbol['Low'][dfSymbol.index[-1]] #the most recent low price
 
 
         candlesticks = go.Candlestick( # draw candlesticks
@@ -30,43 +31,50 @@ def vizADXCobra(dfBase, dateWindow, dfSupportLines, dfResistanceLines, params):
             open = dfSymbol['Open'],
             close = dfSymbol['Close'],
             high = dfSymbol['High'],
-            low = dfSymbol['Low']
+            low = dfSymbol['Low'], 
+            name='Candles'
         )
 
         SMA_hlc3 = go.Scatter(
             x=dfSymbol['Date'],
             y=dfSymbol['SMAhlc3'],
             mode='lines',
+            name='SMA HLC3',
             line = dict(color='black', width=2)
         )
         SMA_high = go.Scatter(
             x=dfSymbol['Date'],
             y=dfSymbol['SMAhigh'],
             mode='lines',
+            name='SMA High',
             line = dict(color='black', width=1)
         )
         SMA_low = go.Scatter(
             x=dfSymbol['Date'],
             y=dfSymbol['SMAlow'],
             mode='lines',
+            name='SMA Low',
             line = dict(color='black', width=1)
         )
         EMA_hlc3 = go.Scatter(
             x=dfSymbol['Date'],
             y=dfSymbol['EMAhlc3'],
             mode='lines',
+            name='EMA HLC3',
             line = dict(color='blue', width=2)
         )
         EMA_high = go.Scatter(
             x=dfSymbol['Date'],
             y=dfSymbol['EMAhigh'],
             mode='lines',
+            name='EMA High',
             line = dict(color='blue', width=1)
         )
         EMA_low = go.Scatter(
             x=dfSymbol['Date'],
             y=dfSymbol['EMAlow'],
             mode='lines',
+            name='EMA Low',
             line = dict(color='blue', width=1)
         )
         ADX = go.Scatter(
@@ -103,7 +111,7 @@ def vizADXCobra(dfBase, dateWindow, dfSupportLines, dfResistanceLines, params):
         fig.update_layout( # to update the chart title with date window information
             title=go.layout.Title(
                 text = symbol + "<br><sup>" + windowType + ": " + startDate.strftime("%Y/%m/%d") + " to " + endDate.strftime("%Y/%m/%d") + "</sup>",
-                xref = "paper",
+                xref = "paper", 
                 x=0)
             )
         fig.add_hline(y=adxLowerLimit, line_dash='dot', row=2, col=1, annotation_text='Lower Limit - '+str(adxLowerLimit), annotation_position="bottom right", line_color='grey', line_width=1)
@@ -111,18 +119,18 @@ def vizADXCobra(dfBase, dateWindow, dfSupportLines, dfResistanceLines, params):
 
         # add resistance lines
         for index, row in dfResistanceLines.iterrows():
-            """
-            if (row['rankTops'] <= 5): #consider the lines only within 20%
-                similarTops = int(row['similarTops'])
-                avgHigh = round(row['avgHigh'],2)
-                annotation_text = str(avgHigh) + ' with ' + str(similarTops) + ' times between ' + str(startDate) + ' and ' + str(endDate) + ' (' + str(row['rankTops']) + ')'
-                annotation_text = ''
-                fig.add_hline(y=avgHigh, row=1, col=1, annotation_text=annotation_text, annotation_position='top left', line_color='orange', line_width=1)
-            """
             avgHigh = round(row['avgHigh'],2)
+            similarTops = int(row['similarTops'])
+            annotation_text = str(avgHigh) + ' with ' + str(similarTops) + ' times between ' + str(startDate) + ' and ' + str(endDate) + ' (' + str(row['rankTops']) + ')'
             if avgHigh <= (latestHigh*1.20): # ignore the lines that are 25% above the latest high
-                annotation_text=''
                 fig.add_hline(y=avgHigh, row=1, col=1, annotation_text=annotation_text, annotation_position='top left', line_color='orange', line_width=1)
+            
+        for index, row in dfSupportLines.iterrows():
+            avgLow = round(row['avgLow'],2)
+            similarBottoms = row['similarBottoms']
+            annotation_text = str(avgLow) + ' with ' + str(similarBottoms) + ' times between ' + str(startDate) + ' and ' + str(endDate) + ' (' + str(row['rankBottoms']) + ')'
+            if avgLow <= (latestLow*1.20):
+                fig.add_hline(y=avgLow, row=1, col=1, annotation_text= annotation_text, annotation_position='top left', line_color='darkturquoise', line_width=1)
 
         fig.update(layout_xaxis_rangeslider_visible=False) # to turn off the range slider at the bottom of the chart
 

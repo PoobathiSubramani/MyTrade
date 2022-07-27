@@ -4,9 +4,6 @@ sys.path.insert(0, '/Users/boopathi/Experiments/myTrade') #path of the app
 from programs.get_trade_data import getTradedata
 from programs.find_nodes import findNodes
 from programs.support_and_resistance_lines import getSRLines
-#from programs.candle_pattern_detector import detectCandlePattern
-#from programs.support_and_resistance_lines import findSimilarNodes
-#from programs.support_and_resistance_lines import findNodes
 from programs.date_window import getDateWindow
 from programs.viz_ADX_Cobra import vizADXCobra
 from programs.pattern_MADX_Cobra import MADXCobra
@@ -15,7 +12,6 @@ import pandas as pd
 
 # variables
 dataPath = '/Users/boopathi/Experiments/myTrade/data/'
-#dataPath = '/Users/boopathi/Library/CloudStorage/GoogleDrive-boopathy.s@gmail.com/My Drive/data'
 tolerancePct = 1 
 
 # execution mode
@@ -36,7 +32,7 @@ endDate = dateWindow['endDate'] # resolved end date
 MADXCobraParams = {'emaTimePeriod':10, 'smaTimePeriod':72, 'adxTimePeriod': 10, 'adxLowerLimit':20, 'adxUpperLimit':50}
 
 # select the stocks list 
-symbols = ['DMART.NS','ASIANPAINT.NS']
+symbols = ['SAIL.NS']
 # TATACOMM, ASIANPAINT, DMART
 
 dfRawTradeData = getTradedata(symbols=symbols, executionMode=executionMode, dataPath=dataPath, dateWindow=dateWindow)
@@ -52,7 +48,7 @@ print("Resistance Line data")
 print(dfResistanceLines.head(10))
 dfPattern = MADXCobra(dfRawTradeData, params=MADXCobraParams)
 print("Visualizing data... ")
-vizADXCobra(dfPattern, dateWindow=dateWindow, dfSupportLines=dfSupportLines, dfResistanceLines=dfResistanceLines, params=MADXCobraParams)
+vizADXCobra(dfBase=dfPattern, dateWindow=dateWindow, dfSupportLines=dfSupportLines, dfResistanceLines=dfResistanceLines, params=MADXCobraParams)
 
 
 

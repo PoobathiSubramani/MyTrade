@@ -2,6 +2,7 @@
 this program gets the support and resistance lines for a given node-based dataset
 """
 
+from numpy import int64
 import pandas as pd
 
 def getSRLines(df):
@@ -11,7 +12,8 @@ def getSRLines(df):
         # calculate the score for Resistance Lines
         dfSymbolTop = df.loc[df['symbol']==symbol] 
         dfTopSummary = dfSymbolTop.groupby(by=['symbol','startDate','endDate','age','similarTops'])['avgHigh', 'scoreTops'].mean().reset_index()
-        dfTopSummary['rankTops'] = dfTopSummary['scoreTops'].rank(ascending=False)
+        dfTopSummary['similarTops'] = dfTopSummary['similarTops'].astype(int64) #convert to int
+        dfTopSummary['rankTops'] = dfTopSummary['scoreTops'].rank(ascending=False).astype(int64)
         currMaxPrice = dfSymbolTop.loc[dfSymbolTop.index.max(), 'High']
         dfTopSummary['currMaxPrice'] = currMaxPrice # get the max price of latest candle 
         dfTopSummary['pctHigher'] =(dfTopSummary['avgHigh'] - currMaxPrice) / currMaxPrice # calculate the pct diff between the latest max price and avg price of the resistance line
@@ -22,7 +24,8 @@ def getSRLines(df):
         #calculate the score for support lines
         dfSymbolBottom = df.loc[df['symbol']==symbol] 
         dfBottomSummary = dfSymbolBottom.groupby(by=['symbol','startDate','endDate','age','similarBottoms'])['avgLow', 'scoreBottoms'].mean().reset_index()
-        dfBottomSummary['rankBottoms'] = dfBottomSummary['scoreBottoms'].rank(ascending=False)
+        dfBottomSummary['similarBottoms'] = dfBottomSummary['similarBottoms'].astype(int64) #convert to int
+        dfBottomSummary['rankBottoms'] = dfBottomSummary['scoreBottoms'].rank(ascending=False).astype(int64)
         currMinPrice = dfSymbolBottom.loc[dfSymbolBottom.index.max(), 'Low']
         dfBottomSummary['currMinPrice'] = currMinPrice # get the min price of latest candle 
         dfBottomSummary['pctLower'] =(currMinPrice - dfBottomSummary['avgLow']) / currMinPrice # calculate the pct diff between the latest max price and avg price of the resistance line
