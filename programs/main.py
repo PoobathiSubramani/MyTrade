@@ -7,6 +7,7 @@ from programs.support_and_resistance_lines import getSRLines
 from programs.date_window import getDateWindow
 from programs.viz_ADX_Cobra import vizADXCobra
 from programs.pattern_MADX_Cobra import MADXCobra
+from programs.analysis import analyze
 
 import pandas as pd
 
@@ -32,7 +33,7 @@ endDate = dateWindow['endDate'] # resolved end date
 MADXCobraParams = {'emaTimePeriod':10, 'smaTimePeriod':72, 'adxTimePeriod': 10, 'adxLowerLimit':20, 'adxUpperLimit':50}
 
 # select the stocks list 
-symbols = ['SAIL.NS']
+symbols = ['MARICO.NS','DABUR.NS','PAYTM.NS']
 # TATACOMM, ASIANPAINT, DMART
 
 dfRawTradeData = getTradedata(symbols=symbols, executionMode=executionMode, dataPath=dataPath, dateWindow=dateWindow)
@@ -47,6 +48,13 @@ print(dfSupportLines.head(10))
 print("Resistance Line data")
 print(dfResistanceLines.head(10))
 dfPattern = MADXCobra(dfRawTradeData, params=MADXCobraParams)
+print('Pattern Data:')
+print(dfPattern.tail(10))
+dfAnalysisSummary = analyze(dfPattern, dfSupportLines, dfResistanceLines, MADXCobraParams=MADXCobraParams)
+print("Analysis Summary:")
+print(dfAnalysisSummary)
+suggestedSymbols = dfAnalysisSummary['symbol'].to_list()
+print('Suggested Symbols:', suggestedSymbols)
 print("Visualizing data... ")
 vizADXCobra(dfBase=dfPattern, dateWindow=dateWindow, dfSupportLines=dfSupportLines, dfResistanceLines=dfResistanceLines, params=MADXCobraParams)
 
