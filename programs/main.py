@@ -8,11 +8,17 @@ from programs.date_window import getDateWindow
 from programs.viz_ADX_Cobra import vizADXCobra
 from programs.pattern_MADX_Cobra import MADXCobra
 from programs.analysis import analyze
+from programs.gSheets import getSheetService, readAllSymbols
 
 import pandas as pd
 
 # variables
 dataPath = '/Users/boopathi/Experiments/myTrade/data/'
+googleCredsPath = '/Users/boopathi/Experiments/myTrade/keys/credentials.json' #the path where the credentials downloaded from google sheets API
+allSymbolsParams = {
+    'sheetId':'1XoVUOt6cV5iVj8Ma5nHjkCZoWZTiJYjQI8miv4k3R-I', #get this from the share-link of the sheet
+    'sheetRange': 'symbolsList!A:B' # range from the sheet, which contains information
+    }
 tolerancePct = 1 
 
 # execution mode
@@ -32,8 +38,11 @@ endDate = dateWindow['endDate'] # resolved end date
 # parameters for MADX Cobra strategy
 MADXCobraParams = {'emaTimePeriod':10, 'smaTimePeriod':72, 'adxTimePeriod': 10, 'adxLowerLimit':20, 'adxUpperLimit':50}
 
-# select the stocks list 
-symbols = ['MARICO.NS','DABUR.NS','PAYTM.NS']
+# get the stocks list 
+sheetService = getSheetService(credsPath=googleCredsPath)
+dfAllSymbols = readAllSymbols(sheetId=allSymbolsParams['sheetId'], sheetRange=allSymbolsParams['sheetRange'], service=sheetService)
+symbols = dfAllSymbols['symbol'].to_list()
+print(symbols)
 # TATACOMM, ASIANPAINT, DMART
 
 dfRawTradeData = getTradedata(symbols=symbols, executionMode=executionMode, dataPath=dataPath, dateWindow=dateWindow)

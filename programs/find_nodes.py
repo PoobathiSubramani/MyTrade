@@ -81,7 +81,6 @@ def findNodes(df, tolerancePct):
 
                 # create a temp dataset that meets the criteria. get the summary from that and update that on the row in the current loop.
                 dfTempTop = dfSymbolTops.loc[(dfSymbolTops['High']>=topLowLimit) & (dfSymbolTops['High']<=topHighLimit)]
-                print(dfTempTop)
                 similarTops = dfTempTop.shape[0] # get the number of rows that meets the tolerance criteria  
                 avgHigh = dfTempTop['High'].mean() # get the avg high price for the criteria
                 startDate, endDate = dfTempTop['Date'].agg(['min','max']) # get the start and end date of the row(s) that meet the criteria    

@@ -2,7 +2,6 @@
 this program does analysis on the input dataset to find symbols that can be pursued
 """
 
-from sqlite3 import Date
 import pandas as pd
 import datetime 
 
