@@ -136,14 +136,14 @@ def vizADXCobra(symbols, dfBase, dateWindow, dfSupportLines, dfResistanceLines, 
         fig.add_hline(y=adxUpperLimit, line_dash='dot', row=2, col=1, annotation_text='Upper Limit - '+str(adxUpperLimit), annotation_position="bottom right", line_color='grey', line_width=1)
 
         # add resistance lines
-        for index, row in dfResistanceLines.iterrows():
+        for index, row in dfResistanceLines.loc[dfResistanceLines['symbol']==symbol].iterrows():
             avgHigh = round(row['avgHigh'],2)
             similarTops = int(row['similarTops'])
             annotation_text = str(avgHigh) + ' with ' + str(similarTops) + ' times between ' + str(startDate) + ' and ' + str(endDate) + ' (' + str(row['rankTops']) + ')'
             if avgHigh <= (latestHigh*1.20): # ignore the lines that are 25% above the latest high
                 fig.add_hline(y=avgHigh, row=1, col=1, annotation_text=annotation_text, annotation_position='top left', line_color='orange', line_width=1)
             
-        for index, row in dfSupportLines.iterrows():
+        for index, row in dfSupportLines.loc[dfSupportLines['symbol']==symbol].iterrows():
             avgLow = round(row['avgLow'],2)
             similarBottoms = row['similarBottoms']
             annotation_text = str(avgLow) + ' with ' + str(similarBottoms) + ' times between ' + str(startDate) + ' and ' + str(endDate) + ' (' + str(row['rankBottoms']) + ')'

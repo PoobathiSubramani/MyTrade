@@ -28,6 +28,7 @@ def analyze(dfPattern, dfSupportLines, dfResistanceLines, MADXCobraParams):
         'latestSMAHigh':latestSMAHigh,
         'latestEMALow':latestEMALow,
         'latestEMAHigh':latestEMAHigh,
+        'latestLow': latestLow,
         'latestADX':latestADX,
         'prevADX':prevADX,
         'suggestion':suggestion}
@@ -39,8 +40,11 @@ def analyze(dfPattern, dfSupportLines, dfResistanceLines, MADXCobraParams):
             latestADX > ADXLowerLimit and latestADX < ADXUpperLimit):
             qualifiedSymbols.append(symbol)
             suggestion = 'buy' # set the acction to buy
+            dictSummary.update({'suggestion':'buy'})
             dfAnalysisSummary = dfAnalysisSummary.append(dictSummary, ignore_index=True) # append the data into summary dataset
         else:
+            suggestion = 'skip' # set the acction to buy
+            dictSummary.update({'suggestion':'skip'})
             dfAnalysisSummary = dfAnalysisSummary.append(dictSummary, ignore_index=True)
         
     #print(dfAnalysisSummary)
