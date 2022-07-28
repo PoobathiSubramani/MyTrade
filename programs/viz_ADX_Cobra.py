@@ -4,6 +4,7 @@ This visualization will show the chart with the following
 2. Exponential Moving Avg (high, close, hlc3)
 3. ADX, ADXR
 """
+from __future__ import annotations
 from re import X
 from tkinter import Y
 from turtle import color, width
@@ -11,7 +12,24 @@ from unicodedata import name
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 
-def vizADXCobra(dfBase, dateWindow, dfSupportLines, dfResistanceLines, params):
+def vizADXCobra(symbols, dfBase, dateWindow, dfSupportLines, dfResistanceLines, params):
+
+    if (len(symbols) == 0): #if there are no symbols that met the conditions, display a message and return
+        fig = go.Figure()
+        fig.update_layout(
+            xaxis = {'visible':False},
+            yaxis = {'visible':False},
+            annotations = [{
+                'text': 'No symbols to display :( ',
+                'xref': 'paper',
+                'yref': 'paper',
+                'showarrow': False,
+                'font': {'size':28}
+            }]
+        )
+        fig.show()
+        return
+
     windowType = dateWindow['windowType'] # resolved window type
     startDate = dateWindow['startDate'] # resolved start date
     endDate = dateWindow['endDate'] # resolved end date    
@@ -19,7 +37,7 @@ def vizADXCobra(dfBase, dateWindow, dfSupportLines, dfResistanceLines, params):
     adxLowerLimit = params['adxLowerLimit']
     adxUpperLimit = params['adxUpperLimit']
 
-    for symbol in dfBase['symbol'].unique(): # draw the chart for each symbol in the dataset
+    for symbol in symbols: # draw the chart for each symbol in the suggested symbols list
         dfSymbol = dfBase.loc[(dfBase['symbol']==symbol) & (dfBase['SMAhigh']>0)] # get the data for the symbol that is currently in loop
 
         latestHigh = dfSymbol['High'][dfSymbol.index[-1]] #the most recent high price

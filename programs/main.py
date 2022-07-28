@@ -53,10 +53,10 @@ print(dfPattern.tail(10))
 dfAnalysisSummary = analyze(dfPattern, dfSupportLines, dfResistanceLines, MADXCobraParams=MADXCobraParams)
 print("Analysis Summary:")
 print(dfAnalysisSummary)
-suggestedSymbols = dfAnalysisSummary['symbol'].to_list()
+suggestedSymbols = dfAnalysisSummary.loc[dfAnalysisSummary['suggestion']=='buy', 'symbol'].to_list()
 print('Suggested Symbols:', suggestedSymbols)
 print("Visualizing data... ")
-vizADXCobra(dfBase=dfPattern, dateWindow=dateWindow, dfSupportLines=dfSupportLines, dfResistanceLines=dfResistanceLines, params=MADXCobraParams)
+vizADXCobra(symbols=suggestedSymbols, dfBase=dfPattern, dateWindow=dateWindow, dfSupportLines=dfSupportLines, dfResistanceLines=dfResistanceLines, params=MADXCobraParams)
 
 
 
