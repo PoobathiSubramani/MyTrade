@@ -19,12 +19,13 @@ def getSheetService(credsPath):
     except HttpError as err:
         print("exception: ", err)
 
-def readAllSymbols(sheetId, sheetRange, service):
+def readSheet(sheetId, sheetRange, service):
     sheetObj = service.spreadsheets()
     result = sheetObj.values().get(spreadsheetId=sheetId, range=sheetRange).execute()
     values = result.get('values',[])
-    df = pd.DataFrame(values[1:], columns=values[0])
+    df = pd.DataFrame(values[1:], columns=values[0]) # use the first row for column names
     return df
+
 
 def writeSheet(sheetId, service, inputData):
     writeRequest = [{

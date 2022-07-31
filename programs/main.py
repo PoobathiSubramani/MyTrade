@@ -8,7 +8,7 @@ from programs.date_window import getDateWindow
 from programs.viz_ADX_Cobra import vizADXCobra
 from programs.pattern_MADX_Cobra import MADXCobra
 from programs.analysis import analyze
-from programs.gSheets import getSheetService, readAllSymbols
+from programs.gSheets import getSheetService, readSheet
 
 import pandas as pd
 
@@ -19,6 +19,12 @@ allSymbolsParams = {
     'sheetId':'1XoVUOt6cV5iVj8Ma5nHjkCZoWZTiJYjQI8miv4k3R-I', #get this from the share-link of the sheet
     'sheetRange': 'symbolsList!A:B' # range from the sheet, which contains information
     }
+mySymbolsParams = {
+    'sheetId':'16nJ1pC3cvFzF69zUnnaElFS0U7Rk4Pw1LAbsSzPUfyM', #get this from the share-link of the sheet
+    'sheetRange': 'symbolsList!A:I' # range from the sheet, which contains information
+    }
+
+    
 tolerancePct = 1 
 
 # execution mode
@@ -36,17 +42,28 @@ startDate = dateWindow['startDate'] # resolved start date
 endDate = dateWindow['endDate'] # resolved end date
 
 # parameters for MADX Cobra strategy
-MADXCobraParams = {'emaTimePeriod':10, 'smaTimePeriod':72, 'adxTimePeriod': 10, 'adxLowerLimit':20, 'adxUpperLimit':50}
+MADXCobraParams = {
+    'emaTimePeriod':10, 
+    'smaTimePeriod':72, 
+    'adxTimePeriod': 10, 
+    'adxLowerLimit':20, 
+    'adxUpperLimit':50,
+    'resistnaceLimitPct':10, # consider only the resistance lines at this pct above the current high
+    'supportLimitPct':10 # consider only the support lines at this pct below the current low
+    }
 
 # get the stocks list 
 sheetService = getSheetService(credsPath=googleCredsPath)
-dfAllSymbols = readAllSymbols(sheetId=allSymbolsParams['sheetId'], sheetRange=allSymbolsParams['sheetRange'], service=sheetService)
-symbols = dfAllSymbols['symbol'].to_list()
-symbols = ['ASIANPAINT.NS', 'HDFC.NS', 'ICICIBANK.NS', 'ITC.NS', 'SBIN.NS', 'ULTRACEMCO.NS', 'ATGL.NS', 'BEL.NS', 'HAL.NS', 'INDHOTEL.NS', 'KAJARIACER.NS', 'NAVINFLUOR.NS', 'PAGEIND.NS', 'VINATIORGA.NS', 'WHIRLPOOL.NS']
-print(symbols)
-# TATACOMM, ASIANPAINT, DMART
+dfAllSymbols = readSheet(sheetId=allSymbolsParams['sheetId'], sheetRange=allSymbolsParams['sheetRange'], service=sheetService)
+allSymbols = dfAllSymbols['symbol'].to_list()
+#symbols = ['ASIANPAINT.NS', 'HDFC.NS', 'ICICIBANK.NS', 'ITC.NS', 'SBIN.NS', 'ULTRACEMCO.NS', 'ATGL.NS', 'BEL.NS', 'HAL.NS', 'INDHOTEL.NS', 'KAJARIACER.NS', 'NAVINFLUOR.NS', 'PAGEIND.NS', 'VINATIORGA.NS', 'WHIRLPOOL.NS']
+#symbols = ['ASIANPAINT.NS', 'HDFC.NS', 'ICICIBANK.NS']
+print(allSymbols)
 
-dfRawTradeData = getTradedata(symbols=symbols, executionMode=executionMode, dataPath=dataPath, dateWindow=dateWindow)
+dfMySymbols = readSheet(sheetId=mySymbolsParams['sheetId'], sheetRange=mySymbolsParams['sheetRange'], service=sheetService)
+mySymbols = dfMySymbols['symbols'].to_list()
+
+dfRawTradeData = getTradedata(symbols=allSymbols, executionMode=executionMode, dataPath=dataPath, dateWindow=dateWindow)
 print("Raw data collected:")
 print(dfRawTradeData.head(10))
 dfNodes = findNodes(dfRawTradeData, tolerancePct=tolerancePct)
@@ -58,7 +75,7 @@ print(dfSupportLines.head(10))
 print("Resistance Line data")
 print(dfResistanceLines.head(10))
 dfPattern = MADXCobra(dfRawTradeData, params=MADXCobraParams)
-print('Pattern Data:')
+print('Pattern Data (tail sample):')
 print(dfPattern.tail(10))
 dfAnalysisSummary = analyze(dfPattern, dfSupportLines, dfResistanceLines, MADXCobraParams=MADXCobraParams)
 print("Analysis Summary:")
@@ -67,20 +84,14 @@ suggestedSymbols = dfAnalysisSummary.loc[dfAnalysisSummary['suggestion']=='buy',
 print('Suggested Symbols:', suggestedSymbols)
 print("Visualizing data... ")
 vizADXCobra(symbols=suggestedSymbols, dfBase=dfPattern, dateWindow=dateWindow, dfSupportLines=dfSupportLines, dfResistanceLines=dfResistanceLines, params=MADXCobraParams)
+def analyzeAllSymbols()
+
+def trackMySymbols(mySymbols, executionMode, dataPath, dateWindow, MADXCobraParams):
+    dfRawTradeData = getTradedata(symbols=mySymbols, executionMode=executionMod e, dataPath=dataPath, dateWindow=dateWindow)
+    dfPattern = MADXCobra(dfRawTradeData, params=MADXCobraParams)
+    dfAnalysisSummary = analyze(dfPattern, dfSupportLines, dfResistanceLines, MADXCobraParams=MADXCobraParams)
+    vizADXCobra(symbols=mySymbols, dfBase=dfPattern, dateWindow=dateWindow, dfSupportLines=dfSupportLines, dfResistanceLines=dfResistanceLines, params=MADXCobraParams)
+    print(dfAnalysisSummary)
 
 
-
-#dfRawTradeData = detectCandlePattern(dfRawTradeData) #adding candle patterns to the raw data
-#dfTest = dfRawTradeData.loc[dfRawTradeData['ADX']>=20]
-#dfTest['action'] = 'buy' if dfTest.loc[dfTest['ADX']>dfTest['ADXR']] else 'sell'
-#dfTest['action'] = dfTest.apply(lambda x: 'buy' if x['ADX']>x['ADXR'] else 'sell', axis=1)
-#print(dfRawTradeData.tail(20))
-#print(dfTest)
-
-#vizADXCobra(dfBase=dfRawTradeData, dateWindow = dateWindow, params=MADXCobraParams)
-
-#dfNodes = findNodes(dfRawTradeData=dfRawTradeData)
-#dfNeighborNodes = findSimilarNodes(dfNodes=dfNodes, tolerance=tolerancePct, dataPath=dataPath)
-#dfLines = getSupportAndResistanceLines(dfNeighborNodes=dfNeighborNodes, dataPath=dataPath)
-#dfLines.to_csv(dataPath+'support_and_resistance_lines'+'.csv', sep='\t')
-#drawVisualization(dfBase=dfRawTradeData, dfLines=dfLines, dateWindow = dateWindow)
+trackMySymbols(mySymbols=mySymbols, executionMode=executionMode, dataPath=dataPath, dateWindow=dateWindow)

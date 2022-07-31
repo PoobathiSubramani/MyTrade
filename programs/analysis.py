@@ -2,6 +2,7 @@
 this program does analysis on the input dataset to find symbols that can be pursued
 """
 
+from operator import index
 import pandas as pd
 import datetime 
 
@@ -41,11 +42,13 @@ def analyze(dfPattern, dfSupportLines, dfResistanceLines, MADXCobraParams):
             qualifiedSymbols.append(symbol)
             suggestion = 'buy' # set the acction to buy
             dictSummary.update({'suggestion':'buy'})
-            dfAnalysisSummary = dfAnalysisSummary.append(dictSummary, ignore_index=True) # append the data into summary dataset
+            #dfAnalysisSummary = dfAnalysisSummary.append(dictSummary, ignore_index=True) # append the data into summary dataset
+            dfAnalysisSummary = pd.concat([dfAnalysisSummary, pd.DataFrame(dictSummary, index=[0])], axis=0)
         else:
             suggestion = 'skip' # set the acction to buy
             dictSummary.update({'suggestion':'skip'})
-            dfAnalysisSummary = dfAnalysisSummary.append(dictSummary, ignore_index=True)
+            #dfAnalysisSummary = dfAnalysisSummary.append(dictSummary, ignore_index=True)
+            dfAnalysisSummary = pd.concat([dfAnalysisSummary, pd.DataFrame(dictSummary, index=[0])], axis=0)
         
     #print(dfAnalysisSummary)
     return dfAnalysisSummary
