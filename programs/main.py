@@ -30,7 +30,6 @@ filterParams = {
     'maxPrice':500
 }    
 
-
 # execution mode
 executionModes = {0:'Start Over',1:'Reuse Data'}
 executionMode = executionModes[0]
@@ -72,26 +71,30 @@ def analyzeAllSymbols(allSymbols, executionMode, dataPath, dateWindow, filterPar
     dfRawTradeData = getTradedata(symbols=allSymbols, executionMode=executionMode, dataPath=dataPath, dateWindow=dateWindow, filterParams=filterParams)
     print("Raw data collected:")
     print(dfRawTradeData.head(10))
-    dfNodes = findNodes(dfRawTradeData, filterParams)
+
+    dfPattern = MADXCobra(dfRawTradeData, params=MADXCobraParams)
+    print('Pattern Data (tail sample):')
+    print(dfPattern.tail(10))
+
+    dfAnalysisSummary = analyze(dfPattern, MADXCobraParams=MADXCobraParams, filterParams=filterParams)
+    print("Analysis Summary:")
+    print(dfAnalysisSummary)
+    suggestedSymbols = dfAnalysisSummary.loc[dfAnalysisSummary['suggestion']=='buy', 'symbol'].to_list()
+    print('Suggested Symbols:', suggestedSymbols)
+
+    dfNodes = findNodes(dfRawTradeData, suggestedSymbols, filterParams)
     print("Data with nodes - the turning points from low to high or high to low")
     print(dfNodes.sort_values(by=['symbol','scoreTops'], ascending=[True, False]).head(20))
+    
     dfSupportLines, dfResistanceLines = getSRLines(df=dfNodes)
     print("Support Line data")
     print(dfSupportLines.head(10))
     print("Resistance Line data")
     print(dfResistanceLines.head(10))
-    dfPattern = MADXCobra(dfRawTradeData, params=MADXCobraParams)
-    print('Pattern Data (tail sample):')
-    print(dfPattern.tail(10))
-    dfAnalysisSummary = analyze(dfPattern, dfSupportLines, dfResistanceLines, MADXCobraParams=MADXCobraParams, filterParams=filterParams)
-    print("Analysis Summary:")
-    print(dfAnalysisSummary)
-    suggestedSymbols = dfAnalysisSummary.loc[dfAnalysisSummary['suggestion']=='buy', 'symbol'].to_list()
-    print('Suggested Symbols:', suggestedSymbols)
+    
     print("Visualizing data... ")
     vizADXCobra(symbols=suggestedSymbols, dfBase=dfPattern, dateWindow=dateWindow, dfSupportLines=dfSupportLines, dfResistanceLines=dfResistanceLines, params=MADXCobraParams)
     return dfSupportLines, dfResistanceLines
-
 
 def trackMySymbols(mySymbols, executionMode, dataPath, dateWindow, MADXCobraParams, dfSupportLines, dfResistanceLines):
     dfRawTradeData = getTradedata(symbols=mySymbols, executionMode=executionMode, dataPath=dataPath, dateWindow=dateWindow)

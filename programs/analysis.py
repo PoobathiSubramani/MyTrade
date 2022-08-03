@@ -7,7 +7,7 @@ import pandas as pd
 import datetime 
 
 
-def analyze(dfPattern, dfSupportLines, dfResistanceLines, MADXCobraParams, filterParams):
+def analyze(dfPattern, MADXCobraParams, filterParams):
     qualifiedSymbols = []
     dfAnalysisSummary = pd.DataFrame()
     for symbol in dfPattern['symbol'].unique():
