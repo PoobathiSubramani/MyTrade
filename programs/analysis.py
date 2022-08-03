@@ -7,11 +7,16 @@ import pandas as pd
 import datetime 
 
 
-def analyze(dfPattern, dfSupportLines, dfResistanceLines, MADXCobraParams):
+def analyze(dfPattern, dfSupportLines, dfResistanceLines, MADXCobraParams, filterParams):
     qualifiedSymbols = []
     dfAnalysisSummary = pd.DataFrame()
     for symbol in dfPattern['symbol'].unique():
         dfSymbol = dfPattern.loc[dfPattern['symbol']==symbol]
+        
+        latestHighPrice = dfSymbol.loc[dfSymbol.index[-1], 'High'] # used for skipping the unrequired symbols based on the filter conditions
+        if latestHighPrice > filterParams['maxPrice']:
+            continue #skip the symbols with price range beyond the price in the filter condition         
+        
         latestDate = dfSymbol.loc[dfSymbol.index.max(), 'Date']
         latestSMAHigh = dfSymbol.loc[dfSymbol.index.max(), 'SMAhigh']
         latestEMALow = dfSymbol.loc[dfSymbol.index.max(), 'EMAlow']

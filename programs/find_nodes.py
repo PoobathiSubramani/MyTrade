@@ -8,20 +8,25 @@ import numpy as np
 import pandas as pd
 import datetime
 
-def findNodes(df, tolerancePct):
+def findNodes(df, filterParams):
     print('update: finding the similar tops and bottoms for all the symbols is starting.')
     today = datetime.date.today()
     dfFinal = pd.DataFrame()
+    lineTolerancePct = filterParams['lineTolerancePct']
     for symbol in df['symbol'].unique(): #iterate for each symbol
         
         # find top and bottom nodes for the symbol in current iteration
         dfSymbol = pd.DataFrame() #reset the dataframe for the symbol in current iteration
         dfSymbol = df.loc[df['symbol']==symbol] #create a subset of the symbol in the current iteration
         dfSymbol.reset_index(inplace=True, drop=True) # reset index 
-        nodeCount = dfSymbol.shape[0] # get the total rows to find the relative position wrt to the current iteration in the loop
-        #dfSymbol['reversalLocation'] = None # set value to none
 
-        #for symbolRowNum in dfSymbol['symbolRowNum'].astype(np.int64): # iterate thru all the nodes in the current symbol subset
+        
+        latestHighPrice = dfSymbol.loc[dfSymbol.index[-1], 'High'] # used for skipping the unrequired symbols based on the filter conditions
+        if latestHighPrice > filterParams['maxPrice']:
+            continue #skip the symbols with price range beyond the price in the filter condition 
+
+        nodeCount = dfSymbol.shape[0] # get the total rows to find the relative position wrt to the current iteration in the loop
+
         for index in dfSymbol.index:
             # when starting the iteration, there will not be a prev node. so, to give advantage to the current node, the following override helps
             prevLow = float('inf') if index == 0 else dfSymbol.loc[index-1, 'Low'] #for the 1st node, set the prev node to hypothetical high
@@ -42,16 +47,15 @@ def findNodes(df, tolerancePct):
             
             fibMax = dfSymbol['High'].max()
             fibMin = dfSymbol['Low'].min()
-            fibDiff = fibMax - fibMin
-            fib100pct = fibMax
+
             
 
             if not (dfSymbol.loc[index, 'isBottom']==True or dfSymbol.loc[index, 'isTop']==True):
                 continue # skip the rows that are neither top not bottom
 
             if (dfSymbol.loc[index, 'isBottom']): #only for the bottom nodes
-                bottomLowLimit = dfSymbol.loc[index, 'Low'] * (1-tolerancePct/100)
-                bottomHighLimit = dfSymbol.loc[index, 'Low'] * (1+tolerancePct/100)
+                bottomLowLimit = dfSymbol.loc[index, 'Low'] * (1-lineTolerancePct/100)
+                bottomHighLimit = dfSymbol.loc[index, 'Low'] * (1+lineTolerancePct/100)
 
                 # create a temp dataset that meets the criteria. get the summary from that and update that on the row in the current loop.
                 dfTempBottom = dfSymbolBottoms.loc[(dfSymbolBottoms['Low']>=bottomLowLimit) & (dfSymbolBottoms['Low']<=bottomHighLimit)]
@@ -76,8 +80,8 @@ def findNodes(df, tolerancePct):
                 dfTempBottom.drop(dfTempBottom.index, inplace=True) # drop the dataframe for the next iteration use 
 
             if (dfSymbol.loc[index, 'isTop']): #  only for the top nodes
-                topLowLimit = dfSymbol.loc[index, 'High'] * (1-tolerancePct/100)
-                topHighLimit = dfSymbol.loc[index, 'High'] * (1+tolerancePct/100)
+                topLowLimit = dfSymbol.loc[index, 'High'] * (1-lineTolerancePct/100)
+                topHighLimit = dfSymbol.loc[index, 'High'] * (1+lineTolerancePct/100)
 
                 # create a temp dataset that meets the criteria. get the summary from that and update that on the row in the current loop.
                 dfTempTop = dfSymbolTops.loc[(dfSymbolTops['High']>=topLowLimit) & (dfSymbolTops['High']<=topHighLimit)]

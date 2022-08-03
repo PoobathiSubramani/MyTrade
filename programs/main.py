@@ -17,15 +17,19 @@ dataPath = '/Users/boopathi/Experiments/myTrade/data/'
 googleCredsPath = '/Users/boopathi/Experiments/myTrade/keys/credentials.json' #the path where the credentials downloaded from google sheets API
 allSymbolsParams = {
     'sheetId':'1XoVUOt6cV5iVj8Ma5nHjkCZoWZTiJYjQI8miv4k3R-I', #get this from the share-link of the sheet
-    'sheetRange': 'symbolsList!A:B' # range from the sheet, which contains information
+    'sheetRange': 'symbolsList!A:C' # range from the sheet, which contains information
     }
 mySymbolsParams = {
     'sheetId':'16nJ1pC3cvFzF69zUnnaElFS0U7Rk4Pw1LAbsSzPUfyM', #get this from the share-link of the sheet
-    'sheetRange': 'symbolsList!A:I' # range from the sheet, which contains information
+    'sheetRange': 'mySymbolsList!A:I' # range from the sheet, which contains information
     }
 
-    
-tolerancePct = 1 
+filterParams = {
+    'lineTolerancePct':1,
+    'minPrice':0,
+    'maxPrice':500
+}    
+
 
 # execution mode
 executionModes = {0:'Start Over',1:'Reuse Data'}
@@ -55,43 +59,49 @@ MADXCobraParams = {
 # get the stocks list 
 sheetService = getSheetService(credsPath=googleCredsPath)
 dfAllSymbols = readSheet(sheetId=allSymbolsParams['sheetId'], sheetRange=allSymbolsParams['sheetRange'], service=sheetService)
+#dfAllSymbols = dfAllSymbols.loc[dfAllSymbols['category']=='Nifty 150']
 allSymbols = dfAllSymbols['symbol'].to_list()
-#symbols = ['ASIANPAINT.NS', 'HDFC.NS', 'ICICIBANK.NS', 'ITC.NS', 'SBIN.NS', 'ULTRACEMCO.NS', 'ATGL.NS', 'BEL.NS', 'HAL.NS', 'INDHOTEL.NS', 'KAJARIACER.NS', 'NAVINFLUOR.NS', 'PAGEIND.NS', 'VINATIORGA.NS', 'WHIRLPOOL.NS']
-#symbols = ['ASIANPAINT.NS', 'HDFC.NS', 'ICICIBANK.NS']
+#allSymbols = ['ASIANPAINT.NS', 'HDFC.NS', 'ICICIBANK.NS', 'ITC.NS', 'SBIN.NS', 'ULTRACEMCO.NS', 'ATGL.NS', 'BEL.NS', 'HAL.NS', 'INDHOTEL.NS', 'KAJARIACER.NS', 'NAVINFLUOR.NS', 'PAGEIND.NS', 'VINATIORGA.NS', 'WHIRLPOOL.NS']
+#allSymbols = ['ASIANPAINT.NS', 'HDFC.NS', 'ICICIBANK.NS', 'RECLTD.NS','AMARAJABAT.NS','EIHOTEL.NS']
 print(allSymbols)
 
 dfMySymbols = readSheet(sheetId=mySymbolsParams['sheetId'], sheetRange=mySymbolsParams['sheetRange'], service=sheetService)
-mySymbols = dfMySymbols['symbols'].to_list()
+mySymbols = dfMySymbols['symbol'].to_list()
 
-dfRawTradeData = getTradedata(symbols=allSymbols, executionMode=executionMode, dataPath=dataPath, dateWindow=dateWindow)
-print("Raw data collected:")
-print(dfRawTradeData.head(10))
-dfNodes = findNodes(dfRawTradeData, tolerancePct=tolerancePct)
-print("Data with nodes - the turning points from low to high or high to low")
-print(dfNodes.sort_values(by=['symbol','scoreTops'], ascending=[True, False]).head(20))
-dfSupportLines, dfResistanceLines = getSRLines(df=dfNodes)
-print("Support Line data")
-print(dfSupportLines.head(10))
-print("Resistance Line data")
-print(dfResistanceLines.head(10))
-dfPattern = MADXCobra(dfRawTradeData, params=MADXCobraParams)
-print('Pattern Data (tail sample):')
-print(dfPattern.tail(10))
-dfAnalysisSummary = analyze(dfPattern, dfSupportLines, dfResistanceLines, MADXCobraParams=MADXCobraParams)
-print("Analysis Summary:")
-print(dfAnalysisSummary)
-suggestedSymbols = dfAnalysisSummary.loc[dfAnalysisSummary['suggestion']=='buy', 'symbol'].to_list()
-print('Suggested Symbols:', suggestedSymbols)
-print("Visualizing data... ")
-vizADXCobra(symbols=suggestedSymbols, dfBase=dfPattern, dateWindow=dateWindow, dfSupportLines=dfSupportLines, dfResistanceLines=dfResistanceLines, params=MADXCobraParams)
-def analyzeAllSymbols()
-
-def trackMySymbols(mySymbols, executionMode, dataPath, dateWindow, MADXCobraParams):
-    dfRawTradeData = getTradedata(symbols=mySymbols, executionMode=executionMod e, dataPath=dataPath, dateWindow=dateWindow)
+def analyzeAllSymbols(allSymbols, executionMode, dataPath, dateWindow, filterParams):
+    dfRawTradeData = getTradedata(symbols=allSymbols, executionMode=executionMode, dataPath=dataPath, dateWindow=dateWindow, filterParams=filterParams)
+    print("Raw data collected:")
+    print(dfRawTradeData.head(10))
+    dfNodes = findNodes(dfRawTradeData, filterParams)
+    print("Data with nodes - the turning points from low to high or high to low")
+    print(dfNodes.sort_values(by=['symbol','scoreTops'], ascending=[True, False]).head(20))
+    dfSupportLines, dfResistanceLines = getSRLines(df=dfNodes)
+    print("Support Line data")
+    print(dfSupportLines.head(10))
+    print("Resistance Line data")
+    print(dfResistanceLines.head(10))
     dfPattern = MADXCobra(dfRawTradeData, params=MADXCobraParams)
-    dfAnalysisSummary = analyze(dfPattern, dfSupportLines, dfResistanceLines, MADXCobraParams=MADXCobraParams)
+    print('Pattern Data (tail sample):')
+    print(dfPattern.tail(10))
+    dfAnalysisSummary = analyze(dfPattern, dfSupportLines, dfResistanceLines, MADXCobraParams=MADXCobraParams, filterParams=filterParams)
+    print("Analysis Summary:")
+    print(dfAnalysisSummary)
+    suggestedSymbols = dfAnalysisSummary.loc[dfAnalysisSummary['suggestion']=='buy', 'symbol'].to_list()
+    print('Suggested Symbols:', suggestedSymbols)
+    print("Visualizing data... ")
+    vizADXCobra(symbols=suggestedSymbols, dfBase=dfPattern, dateWindow=dateWindow, dfSupportLines=dfSupportLines, dfResistanceLines=dfResistanceLines, params=MADXCobraParams)
+    return dfSupportLines, dfResistanceLines
+
+
+def trackMySymbols(mySymbols, executionMode, dataPath, dateWindow, MADXCobraParams, dfSupportLines, dfResistanceLines):
+    dfRawTradeData = getTradedata(symbols=mySymbols, executionMode=executionMode, dataPath=dataPath, dateWindow=dateWindow)
+    dfPattern = MADXCobra(dfRawTradeData, params=MADXCobraParams)
+    dfAnalysisSummary = analyze(dfPattern, dfSupportLines, dfResistanceLines, MADXCobraParams=MADXCobraParams, filterParams=filterParams)
     vizADXCobra(symbols=mySymbols, dfBase=dfPattern, dateWindow=dateWindow, dfSupportLines=dfSupportLines, dfResistanceLines=dfResistanceLines, params=MADXCobraParams)
     print(dfAnalysisSummary)
 
+dfSupportLines, dfResistanceLines = analyzeAllSymbols(allSymbols=allSymbols, executionMode=executionMode, dataPath=dataPath, dateWindow=dateWindow, filterParams=filterParams)
 
-trackMySymbols(mySymbols=mySymbols, executionMode=executionMode, dataPath=dataPath, dateWindow=dateWindow)
+# Analysing/tracking the symbols that we own already.
+executionMode = executionModes[1] # set the execution mode to reuse 
+# trackMySymbols(mySymbols=mySymbols, executionMode=executionMode, dataPath=dataPath, dateWindow=dateWindow, MADXCobraParams=MADXCobraParams, dfSupportLines=dfSupportLines, dfResistanceLines=dfResistanceLines)

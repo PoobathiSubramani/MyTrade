@@ -4,7 +4,7 @@ import pandas as pd
 import numpy as np
 
 
-def getTradedata(symbols, executionMode, dataPath, dateWindow):
+def getTradedata(symbols, executionMode, dataPath, dateWindow, filterParams):
     # dataframe definition
     tradeDataColumns=['symbol','Date','Open','High','Low','Close','Adj Close','Volume']
     tradeData = pd.DataFrame(columns=tradeDataColumns)
@@ -17,21 +17,24 @@ def getTradedata(symbols, executionMode, dataPath, dateWindow):
         for symbol in symbols:
             dfSymbol = yf.download(symbol,start=startDate, end=endDate)
             dfSymbol.reset_index(drop=False, inplace=True)
+
+            latestHighPrice = dfSymbol.loc[dfSymbol.index[-1], 'High'] # used for skipping the unrequired symbols based on the filter conditions
+            if latestHighPrice > filterParams['maxPrice']:            
+                continue #skip the symbols with price range beyond the price in the filter condition  
+            
             dfSymbol['symbol']=symbol
             dfSymbol = dfSymbol[tradeDataColumns]
             dfSymbol['symbolRowNum'] = np.arange(start=0, stop=len(dfSymbol), step=1)
             tradeData = pd.concat([tradeData, dfSymbol],axis=0, ignore_index=True)
             print('Update: Geting the data for symbol {} from {} to {} is successful.'.format(symbol, dateWindow['startDate'], dateWindow['endDate']))
+            #tradeData.to_csv(dataPath+symbol+'.csv', sep='\t')
+        tradeData['symbolRowNum'] = tradeData['symbolRowNum'].astype(np.int64)
         tradeData.to_csv(dataPath+'tradeDataRaw.csv', sep='\t')
     else:
         print("Reusing the data that was collected already")
         tradeData = pd.read_csv(dataPath+'tradeDataRaw.csv', sep='\t', usecols=tradeDataColumns)
 
-    # additional columns with some calculations to help further processing
-    #tradeData['large'] = tradeData[['High','Low']].max(axis=1)
-    #tradeData['small'] = tradeData[['High','Low']].min(axis=1)
-    #tradeData['rowNum'] = np.arange(len(tradeData))
-    tradeData['symbolRowNum'] = tradeData['symbolRowNum'].astype(np.int64) 
+     
     tradeData.reset_index(inplace=True, drop=True)
     return tradeData
 

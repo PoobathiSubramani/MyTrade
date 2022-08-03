@@ -58,7 +58,9 @@ def MADXCobra(df, params):
             and latestLow > dfSymbol.loc[maxIndex, 'SMAhigh'] # above the EMA High
             and dfSymbol.loc[maxIndex, 'ADX'] > adxLowerLimit and dfSymbol.loc[maxIndex, 'ADX'] < adxUpperLimit # ADX is within the lower and upper limits
             ) else None 
-
+        print("Pattern Data for {}".format(symbol))
+        print(dfSymbol.head(10))
+        print(dfSymbol.tail(10))
         dfFinal = pd.concat([dfFinal, dfSymbol], axis=0)
     return dfFinal
 
