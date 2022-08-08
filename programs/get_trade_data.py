@@ -1,4 +1,5 @@
 from calendar import month
+from datetime import date
 import yfinance as yf
 import pandas as pd
 import numpy as np
@@ -32,7 +33,8 @@ def getTradedata(symbols, executionMode, dataPath, dateWindow, filterParams):
         tradeData.to_csv(dataPath+'tradeDataRaw.csv', sep='\t')
     else:
         print("Reusing the data that was collected already")
-        tradeData = pd.read_csv(dataPath+'tradeDataRaw.csv', sep='\t', usecols=tradeDataColumns)
+        #tradeData = pd.read_csv(dataPath+'tradeDataRaw.csv', dtype={'symbol':str,'Date':date,'Open':float,'High':float,'Low':float,'Close':float,'Adj Close':float,'Volume':int,'symbolRowNum':int},sep='\t', usecols=tradeDataColumns)
+        tradeData = pd.read_csv(dataPath+'tradeDataRaw.csv',sep='\t', parse_dates=['Date'],usecols=tradeDataColumns)
 
      
     tradeData.reset_index(inplace=True, drop=True)

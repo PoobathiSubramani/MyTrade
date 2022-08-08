@@ -32,7 +32,7 @@ filterParams = {
 
 # execution mode
 executionModes = {0:'Start Over',1:'Reuse Data'}
-executionMode = executionModes[0]
+executionMode = executionModes[1]
 
 # select the date window for the data to be collected
 windowTypes = {0:"Custom Window",1:"ITD", 2:"YTD", 3:"MTD", 4:"WTD", 5:"Rolling 3 Months", 6:"Rolling 6 Months", 7:"Rolling 12 Months", 8:"Rolling 24 Months", 9:"MVG"}
