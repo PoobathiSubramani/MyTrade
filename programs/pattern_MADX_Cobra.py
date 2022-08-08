@@ -61,6 +61,7 @@ def MADXCobra(df, params):
         print("Pattern Data for {}".format(symbol))
         #print(dfSymbol.head(10))
         print(dfSymbol.tail(10))
+        dfSymbol = dfSymbol.sort_values(by='Date', ascending=[True]) #this sorting will fix the issue of connecting the first and last points in plotly.
         dfFinal = pd.concat([dfFinal, dfSymbol], axis=0)
     return dfFinal
 
