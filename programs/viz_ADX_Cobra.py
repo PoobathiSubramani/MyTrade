@@ -11,6 +11,7 @@ from turtle import color, width
 from unicodedata import name
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
+import pandas as pd
 
 def vizADXCobra(symbols, dfBase, dateWindow, dfSupportLines, dfResistanceLines, params):
 
@@ -151,6 +152,7 @@ def vizADXCobra(symbols, dfBase, dateWindow, dfSupportLines, dfResistanceLines, 
                 fig.add_hline(y=avgLow, row=1, col=1, annotation_text= annotation_text, annotation_position='top left', line_color='darkturquoise', line_width=1)
 
         fig.update(layout_xaxis_rangeslider_visible=False) # to turn off the range slider at the bottom of the chart
+
 
         fig.show() # display the chart    
 

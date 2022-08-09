@@ -8,7 +8,7 @@ import numpy as np
 import pandas as pd
 import datetime
 
-def findNodes(df, suggestedSymbols, filterParams):
+def findNodes(df, suggestedSymbols, filterParams={}):
     print('update: finding the similar tops and bottoms for all the symbols is starting.')
     today = datetime.date.today()
     dfFinal = pd.DataFrame()

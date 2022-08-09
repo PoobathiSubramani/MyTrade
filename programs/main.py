@@ -62,13 +62,24 @@ dfAllSymbols = readSheet(sheetId=allSymbolsParams['sheetId'], sheetRange=allSymb
 allSymbols = dfAllSymbols['symbol'].to_list()
 #allSymbols = ['ASIANPAINT.NS', 'HDFC.NS', 'ICICIBANK.NS', 'ITC.NS', 'SBIN.NS', 'ULTRACEMCO.NS', 'ATGL.NS', 'BEL.NS', 'HAL.NS', 'INDHOTEL.NS', 'KAJARIACER.NS', 'NAVINFLUOR.NS', 'PAGEIND.NS', 'VINATIORGA.NS', 'WHIRLPOOL.NS']
 #allSymbols = ['ASIANPAINT.NS', 'HDFC.NS', 'ICICIBANK.NS', 'RECLTD.NS','AMARAJABAT.NS','EIHOTEL.NS']
-print(allSymbols)
+
+
 
 dfMySymbols = readSheet(sheetId=mySymbolsParams['sheetId'], sheetRange=mySymbolsParams['sheetRange'], service=sheetService)
 mySymbols = dfMySymbols['symbol'].to_list()
 
+for mySymbol in mySymbols: #remove instance of mySymbols from allSymbols
+    try:
+        allSymbols.remove(mySymbol)
+    except ValueError:
+        pass
+
+print('all symbols: ',allSymbols)
+print('my symbols: ', mySymbols)
+
+
 def analyzeAllSymbols(allSymbols, executionMode, dataPath, dateWindow, filterParams):
-    dfRawTradeData = getTradedata(symbols=allSymbols, executionMode=executionMode, dataPath=dataPath, dateWindow=dateWindow, filterParams=filterParams)
+    dfRawTradeData = getTradedata(symbols=allSymbols, executionMode=executionMode, dataPath=dataPath, dateWindow=dateWindow, filterParams=filterParams, executionType='analyze')
     print("Raw data collected:")
     print(dfRawTradeData.head(10))
 
@@ -82,7 +93,7 @@ def analyzeAllSymbols(allSymbols, executionMode, dataPath, dateWindow, filterPar
     suggestedSymbols = dfAnalysisSummary.loc[dfAnalysisSummary['suggestion']=='buy', 'symbol'].to_list()
     print('Suggested Symbols:', suggestedSymbols)
 
-    dfNodes = findNodes(dfRawTradeData, suggestedSymbols, filterParams)
+    dfNodes = findNodes(df=dfRawTradeData, suggestedSymbols=suggestedSymbols, filterParams=filterParams)
     print("Data with nodes - the turning points from low to high or high to low")
     print(dfNodes.sort_values(by=['symbol','scoreTops'], ascending=[True, False]).head(20))
     
@@ -94,17 +105,25 @@ def analyzeAllSymbols(allSymbols, executionMode, dataPath, dateWindow, filterPar
     
     print("Visualizing data... ")
     vizADXCobra(symbols=suggestedSymbols, dfBase=dfPattern, dateWindow=dateWindow, dfSupportLines=dfSupportLines, dfResistanceLines=dfResistanceLines, params=MADXCobraParams)
-    return dfSupportLines, dfResistanceLines
+    #return dfSupportLines, dfResistanceLines
 
-def trackMySymbols(mySymbols, executionMode, dataPath, dateWindow, MADXCobraParams, dfSupportLines, dfResistanceLines):
-    dfRawTradeData = getTradedata(symbols=mySymbols, executionMode=executionMode, dataPath=dataPath, dateWindow=dateWindow)
+def trackMySymbols(mySymbols, executionMode, dataPath, dateWindow, MADXCobraParams):
+    filterParams = {
+    'lineTolerancePct':1,
+    'minPrice':0,
+    'maxPrice':float('inf')
+    }   
+    executionType = 'track' 
+    dfRawTradeData = getTradedata(symbols=mySymbols, executionMode=executionMode, dataPath=dataPath, dateWindow=dateWindow, filterParams=filterParams, executionType=executionType)
     dfPattern = MADXCobra(dfRawTradeData, params=MADXCobraParams)
-    dfAnalysisSummary = analyze(dfPattern, dfSupportLines, dfResistanceLines, MADXCobraParams=MADXCobraParams, filterParams=filterParams)
+    dfAnalysisSummary = analyze(dfPattern, MADXCobraParams=MADXCobraParams, filterParams=filterParams)
+    dfNodes = findNodes(df=dfRawTradeData, suggestedSymbols=mySymbols, filterParams=filterParams)
+    dfSupportLines, dfResistanceLines = getSRLines(df=dfNodes)
     vizADXCobra(symbols=mySymbols, dfBase=dfPattern, dateWindow=dateWindow, dfSupportLines=dfSupportLines, dfResistanceLines=dfResistanceLines, params=MADXCobraParams)
     print(dfAnalysisSummary)
 
-dfSupportLines, dfResistanceLines = analyzeAllSymbols(allSymbols=allSymbols, executionMode=executionMode, dataPath=dataPath, dateWindow=dateWindow, filterParams=filterParams)
-
+#dfSupportLines, dfResistanceLines = analyzeAllSymbols(allSymbols=allSymbols, executionMode=executionMode, dataPath=dataPath, dateWindow=dateWindow, filterParams=filterParams)
+analyzeAllSymbols(allSymbols=allSymbols, executionMode=executionMode, dataPath=dataPath, dateWindow=dateWindow, filterParams=filterParams)
 # Analysing/tracking the symbols that we own already.
-executionMode = executionModes[1] # set the execution mode to reuse 
-# trackMySymbols(mySymbols=mySymbols, executionMode=executionMode, dataPath=dataPath, dateWindow=dateWindow, MADXCobraParams=MADXCobraParams, dfSupportLines=dfSupportLines, dfResistanceLines=dfResistanceLines)
+executionMode = executionModes[0] # set the execution mode to reuse 
+trackMySymbols(mySymbols=mySymbols, executionMode=executionMode, dataPath=dataPath, dateWindow=dateWindow, MADXCobraParams=MADXCobraParams)
