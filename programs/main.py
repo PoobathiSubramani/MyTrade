@@ -21,7 +21,7 @@ allSymbolsParams = {
     }
 mySymbolsParams = {
     'sheetId':'16nJ1pC3cvFzF69zUnnaElFS0U7Rk4Pw1LAbsSzPUfyM', #get this from the share-link of the sheet
-    'sheetRange': 'mySymbolsList!A:I' # range from the sheet, which contains information
+    'sheetRange': 'mySymbolsList!A:M' # range from the sheet, which contains information
     }
 
 filterParams = {
@@ -34,7 +34,7 @@ filterParams = {
 executionParams = {'mode':'Start Over', 'type':'analyze'}
 
 executionModes = {0:'Start Over',1:'Reuse Data'}
-executionMode = executionModes[1]
+executionMode = executionModes[0]
 
 # select the date window for the data to be collected
 windowTypes = {0:"Custom Window",1:"ITD", 2:"YTD", 3:"MTD", 4:"WTD", 5:"Rolling 3 Months", 6:"Rolling 6 Months", 7:"Rolling 12 Months", 8:"Rolling 24 Months", 9:"MVG"}
@@ -113,7 +113,6 @@ def trackMySymbols(mySymbols, executionMode, dataPath, dateWindow, MADXCobraPara
     'minPrice':0,
     'maxPrice':float('inf')
     }   
-    executionType = 'track' 
     dfRawTradeData = getTradedata(symbols=mySymbols, executionMode=executionMode, dataPath=dataPath, dateWindow=dateWindow, filterParams=filterParams, executionParams=executionParams)
     dfPattern = MADXCobra(dfRawTradeData, params=MADXCobraParams)
     dfAnalysisSummary = analyze(dfPattern, MADXCobraParams=MADXCobraParams, filterParams=filterParams)

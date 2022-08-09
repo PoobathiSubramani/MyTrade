@@ -155,21 +155,30 @@ def vizADXCobra(symbols, dfBase, dateWindow, dfSupportLines, dfResistanceLines, 
 
         fig.update(layout_xaxis_rangeslider_visible=False) # to turn off the range slider at the bottom of the chart
 
+        if executionParams['type'] == 'track':
+            actionType = dfMySymbols.loc[dfMySymbols['symbol']==symbol, 'actionType'].values[0]
+            if actionType == 'flagged':
+                flaggedDate = dfMySymbols.loc[dfMySymbols['symbol']==symbol, 'flaggedDate'].values[0]
+                flaggedDate = datetime.datetime.strptime(flaggedDate, "%m/%d/%Y").timestamp() * 1000
+                flaggedPrice = dfMySymbols.loc[dfMySymbols['symbol']==symbol, 'flaggedPrice'].astype(float).values[0]
+            
+                fig.add_trace(go.Scatter(x=[flaggedDate], y=[flaggedPrice],name='Flagged', mode='markers', marker=dict(color='Coral', size=20),showlegend=True))
+                fig.update_layout(
+                    paper_bgcolor='rgba(200,200,200,0.2)',
+                    plot_bgcolor='rgba(200,200,200,0.2)'
+                )
 
-        if executionParams['type'] == 'track': # for my symbols to track them
-            purchasedDate = dfMySymbols.loc[dfMySymbols['symbol']==symbol, 'purchasedDate'].values[0]
-            purchasedDate = datetime.datetime.strptime(purchasedDate, "%m/%d/%Y").timestamp() * 1000
-            purchasedPrice = dfMySymbols.loc[dfMySymbols['symbol']==symbol, 'purchasedPrice'].astype(float).values[0]
-            fig.add_trace(go.Scatter(x=[purchasedDate], y=[purchasedPrice],name='Purchase', mode='markers', marker=dict(color='LightSkyBlue', size=20),showlegend=True))
-
-            fig.update_layout(
-                #paper_bgcolor='rgba(161,232,231,1)', #blue'ish
-                #plot_bgcolor='rgba(250,114,60,0.33)' #purple'ish
-                paper_bgcolor='rgba(200,200,200,0.2)',
-                plot_bgcolor='rgba(200,200,200,0.2)'
-            )
-
-
+            if actionType == 'purchased':
+                purchasedDate = dfMySymbols.loc[dfMySymbols['symbol']==symbol, 'purchasedDate'].values[0]
+                purchasedDate = datetime.datetime.strptime(purchasedDate, "%m/%d/%Y").timestamp() * 1000
+                purchasedPrice = dfMySymbols.loc[dfMySymbols['symbol']==symbol, 'purchasedPrice'].astype(float).values[0]
+            
+                fig.add_trace(go.Scatter(x=[purchasedDate], y=[purchasedPrice],name='Purchase', mode='markers', marker=dict(color='LightSkyBlue', size=20),showlegend=True))
+                fig.update_layout(
+                    paper_bgcolor='rgba(200,200,200,0.2)',
+                    plot_bgcolor='rgba(200,200,200,0.2)'
+                )
+            
 
         fig.show() # display the chart    
 
