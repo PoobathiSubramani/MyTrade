@@ -31,6 +31,8 @@ filterParams = {
 }    
 
 # execution mode
+executionParams = {'mode':'Start Over', 'type':'analyze'}
+
 executionModes = {0:'Start Over',1:'Reuse Data'}
 executionMode = executionModes[1]
 
@@ -63,8 +65,6 @@ allSymbols = dfAllSymbols['symbol'].to_list()
 #allSymbols = ['ASIANPAINT.NS', 'HDFC.NS', 'ICICIBANK.NS', 'ITC.NS', 'SBIN.NS', 'ULTRACEMCO.NS', 'ATGL.NS', 'BEL.NS', 'HAL.NS', 'INDHOTEL.NS', 'KAJARIACER.NS', 'NAVINFLUOR.NS', 'PAGEIND.NS', 'VINATIORGA.NS', 'WHIRLPOOL.NS']
 #allSymbols = ['ASIANPAINT.NS', 'HDFC.NS', 'ICICIBANK.NS', 'RECLTD.NS','AMARAJABAT.NS','EIHOTEL.NS']
 
-
-
 dfMySymbols = readSheet(sheetId=mySymbolsParams['sheetId'], sheetRange=mySymbolsParams['sheetRange'], service=sheetService)
 mySymbols = dfMySymbols['symbol'].to_list()
 
@@ -78,8 +78,8 @@ print('all symbols: ',allSymbols)
 print('my symbols: ', mySymbols)
 
 
-def analyzeAllSymbols(allSymbols, executionMode, dataPath, dateWindow, filterParams):
-    dfRawTradeData = getTradedata(symbols=allSymbols, executionMode=executionMode, dataPath=dataPath, dateWindow=dateWindow, filterParams=filterParams, executionType='analyze')
+def analyzeAllSymbols(allSymbols, executionMode, dataPath, dateWindow, filterParams, executionParams):
+    dfRawTradeData = getTradedata(symbols=allSymbols, executionMode=executionMode, dataPath=dataPath, dateWindow=dateWindow, filterParams=filterParams, executionParams=executionParams)
     print("Raw data collected:")
     print(dfRawTradeData.head(10))
 
@@ -104,26 +104,27 @@ def analyzeAllSymbols(allSymbols, executionMode, dataPath, dateWindow, filterPar
     print(dfResistanceLines.head(10))
     
     print("Visualizing data... ")
-    vizADXCobra(symbols=suggestedSymbols, dfBase=dfPattern, dateWindow=dateWindow, dfSupportLines=dfSupportLines, dfResistanceLines=dfResistanceLines, params=MADXCobraParams)
+    vizADXCobra(symbols=suggestedSymbols, dfBase=dfPattern, dateWindow=dateWindow, dfSupportLines=dfSupportLines, dfResistanceLines=dfResistanceLines, MADXCobraParams=MADXCobraParams, executionParams=executionParams)
     #return dfSupportLines, dfResistanceLines
 
-def trackMySymbols(mySymbols, executionMode, dataPath, dateWindow, MADXCobraParams):
+def trackMySymbols(mySymbols, executionMode, dataPath, dateWindow, MADXCobraParams, executionParams, dfMySymbols):
     filterParams = {
     'lineTolerancePct':1,
     'minPrice':0,
     'maxPrice':float('inf')
     }   
     executionType = 'track' 
-    dfRawTradeData = getTradedata(symbols=mySymbols, executionMode=executionMode, dataPath=dataPath, dateWindow=dateWindow, filterParams=filterParams, executionType=executionType)
+    dfRawTradeData = getTradedata(symbols=mySymbols, executionMode=executionMode, dataPath=dataPath, dateWindow=dateWindow, filterParams=filterParams, executionParams=executionParams)
     dfPattern = MADXCobra(dfRawTradeData, params=MADXCobraParams)
     dfAnalysisSummary = analyze(dfPattern, MADXCobraParams=MADXCobraParams, filterParams=filterParams)
     dfNodes = findNodes(df=dfRawTradeData, suggestedSymbols=mySymbols, filterParams=filterParams)
     dfSupportLines, dfResistanceLines = getSRLines(df=dfNodes)
-    vizADXCobra(symbols=mySymbols, dfBase=dfPattern, dateWindow=dateWindow, dfSupportLines=dfSupportLines, dfResistanceLines=dfResistanceLines, params=MADXCobraParams)
+    vizADXCobra(symbols=mySymbols, dfBase=dfPattern, dateWindow=dateWindow, dfSupportLines=dfSupportLines, dfResistanceLines=dfResistanceLines, MADXCobraParams=MADXCobraParams, executionParams=executionParams, dfMySymbols=dfMySymbols)
     print(dfAnalysisSummary)
 
-#dfSupportLines, dfResistanceLines = analyzeAllSymbols(allSymbols=allSymbols, executionMode=executionMode, dataPath=dataPath, dateWindow=dateWindow, filterParams=filterParams)
-analyzeAllSymbols(allSymbols=allSymbols, executionMode=executionMode, dataPath=dataPath, dateWindow=dateWindow, filterParams=filterParams)
-# Analysing/tracking the symbols that we own already.
-executionMode = executionModes[0] # set the execution mode to reuse 
-trackMySymbols(mySymbols=mySymbols, executionMode=executionMode, dataPath=dataPath, dateWindow=dateWindow, MADXCobraParams=MADXCobraParams)
+
+analyzeAllSymbols(allSymbols=allSymbols, executionMode=executionMode, dataPath=dataPath, dateWindow=dateWindow, filterParams=filterParams, executionParams=executionParams)
+
+executionMode = executionModes[0] # set the execution mode to Start Over
+executionParams = {'mode':'Start Over', 'type':'track'}
+trackMySymbols(mySymbols=mySymbols, executionMode=executionMode, dataPath=dataPath, dateWindow=dateWindow, MADXCobraParams=MADXCobraParams, executionParams=executionParams, dfMySymbols=dfMySymbols)

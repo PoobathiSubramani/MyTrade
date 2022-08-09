@@ -5,14 +5,14 @@ import pandas as pd
 import numpy as np
 
 
-def getTradedata(symbols, executionMode, dataPath, dateWindow, filterParams, executionType='analyze'):
+def getTradedata(symbols, executionMode, dataPath, dateWindow, filterParams, executionParams):
     # dataframe definition
     tradeDataColumns=['symbol','Date','Open','High','Low','Close','Adj Close','Volume']
     tradeData = pd.DataFrame(columns=tradeDataColumns)
     windowType = dateWindow['windowType'] # resolved window type
     startDate = dateWindow['startDate'] # resolved start date
     endDate = dateWindow['endDate'] # resolved end date
-    fileSuffix = 'track' if executionType=='track' else 'analyze'
+    fileSuffix = 'track' if executionParams['type']=='track' else 'analyze'
     fileName = 'tradeDataRaw_' + fileSuffix + '.csv'
     print("{} date window is: from {} to {}".format(windowType, startDate, endDate))
     # get the trade data for the symbols

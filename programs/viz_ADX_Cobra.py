@@ -8,12 +8,13 @@ from __future__ import annotations
 from re import X
 from tkinter import Y
 from turtle import color, width
-from unicodedata import name
+from numpy import size
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 import pandas as pd
+import datetime
 
-def vizADXCobra(symbols, dfBase, dateWindow, dfSupportLines, dfResistanceLines, params):
+def vizADXCobra(symbols, dfBase, dateWindow, dfSupportLines, dfResistanceLines, MADXCobraParams, executionParams, dfMySymbols=pd.DataFrame()):
 
     if (len(symbols) == 0): #if there are no symbols that met the conditions, display a message and return
         fig = go.Figure()
@@ -35,8 +36,9 @@ def vizADXCobra(symbols, dfBase, dateWindow, dfSupportLines, dfResistanceLines, 
     startDate = dateWindow['startDate'] # resolved start date
     endDate = dateWindow['endDate'] # resolved end date    
 
-    adxLowerLimit = params['adxLowerLimit']
-    adxUpperLimit = params['adxUpperLimit']
+    adxLowerLimit = MADXCobraParams['adxLowerLimit']
+    adxUpperLimit = MADXCobraParams['adxUpperLimit']
+
 
     for symbol in symbols: # draw the chart for each symbol in the suggested symbols list
         dfSymbol = dfBase.loc[(dfBase['symbol']==symbol) & (dfBase['SMAhigh']>0)] # get the data for the symbol that is currently in loop
@@ -141,17 +143,32 @@ def vizADXCobra(symbols, dfBase, dateWindow, dfSupportLines, dfResistanceLines, 
             avgHigh = round(row['avgHigh'],2)
             similarTops = int(row['similarTops'])
             annotation_text = str(avgHigh) + ' with ' + str(similarTops) + ' times between ' + str(startDate) + ' and ' + str(endDate) + ' (' + str(row['rankTops']) + ')'
-            if avgHigh <= (latestHigh* (1+params['resistnaceLimitPct']/100)): # ignore the lines that are 25% above the latest high
+            if avgHigh <= (latestHigh* (1+MADXCobraParams['resistnaceLimitPct']/100)): # ignore the lines that are 25% above the latest high
                 fig.add_hline(y=avgHigh, row=1, col=1, annotation_text=annotation_text, annotation_position='top left', line_color='orange', line_width=1)
             
         for index, row in dfSupportLines.loc[dfSupportLines['symbol']==symbol].iterrows():
             avgLow = round(row['avgLow'],2)
             similarBottoms = row['similarBottoms']
             annotation_text = str(avgLow) + ' with ' + str(similarBottoms) + ' times between ' + str(startDate) + ' and ' + str(endDate) + ' (' + str(row['rankBottoms']) + ')'
-            if avgLow >= (latestLow*(1-params['supportLimitPct']/100)):
+            if avgLow >= (latestLow*(1-MADXCobraParams['supportLimitPct']/100)):
                 fig.add_hline(y=avgLow, row=1, col=1, annotation_text= annotation_text, annotation_position='top left', line_color='darkturquoise', line_width=1)
 
         fig.update(layout_xaxis_rangeslider_visible=False) # to turn off the range slider at the bottom of the chart
+
+
+        if executionParams['type'] == 'track': # for my symbols to track them
+            purchasedDate = dfMySymbols.loc[dfMySymbols['symbol']==symbol, 'purchasedDate'].values[0]
+            purchasedDate = datetime.datetime.strptime(purchasedDate, "%m/%d/%Y").timestamp() * 1000
+            purchasedPrice = dfMySymbols.loc[dfMySymbols['symbol']==symbol, 'purchasedPrice'].astype(float).values[0]
+            fig.add_trace(go.Scatter(x=[purchasedDate], y=[purchasedPrice],name='Purchase', mode='markers', marker=dict(color='LightSkyBlue', size=20),showlegend=True))
+
+            fig.update_layout(
+                #paper_bgcolor='rgba(161,232,231,1)', #blue'ish
+                #plot_bgcolor='rgba(250,114,60,0.33)' #purple'ish
+                paper_bgcolor='rgba(200,200,200,0.2)',
+                plot_bgcolor='rgba(200,200,200,0.2)'
+            )
+
 
 
         fig.show() # display the chart    
