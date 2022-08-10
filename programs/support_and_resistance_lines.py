@@ -11,7 +11,7 @@ def getSRLines(df):
     for symbol in df['symbol'].unique():
         # calculate the score for Resistance Lines
         dfSymbolTop = df.loc[df['symbol']==symbol] 
-        dfTopSummary = dfSymbolTop.groupby(by=['symbol','startDate','endDate','age','similarTops'])['avgHigh', 'scoreTops'].mean().reset_index()
+        dfTopSummary = dfSymbolTop.groupby(by=['symbol','startDate','endDate','age','similarTops'])[['avgHigh', 'scoreTops']].mean().reset_index()
         dfTopSummary['similarTops'] = dfTopSummary['similarTops'].astype(int64) #convert to int
         dfTopSummary['rankTops'] = dfTopSummary['scoreTops'].rank(ascending=False).astype(int64)
         currMaxPrice = dfSymbolTop.loc[dfSymbolTop.index.max(), 'High']
@@ -23,7 +23,7 @@ def getSRLines(df):
 
         #calculate the score for support lines
         dfSymbolBottom = df.loc[df['symbol']==symbol] 
-        dfBottomSummary = dfSymbolBottom.groupby(by=['symbol','startDate','endDate','age','similarBottoms'])['avgLow', 'scoreBottoms'].mean().reset_index()
+        dfBottomSummary = dfSymbolBottom.groupby(by=['symbol','startDate','endDate','age','similarBottoms'])[['avgLow', 'scoreBottoms']].mean().reset_index()
         dfBottomSummary['similarBottoms'] = dfBottomSummary['similarBottoms'].astype(int64) #convert to int
         dfBottomSummary['rankBottoms'] = dfBottomSummary['scoreBottoms'].rank(ascending=False).astype(int64)
         currMinPrice = dfSymbolBottom.loc[dfSymbolBottom.index.max(), 'Low']
