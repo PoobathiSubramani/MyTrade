@@ -162,7 +162,7 @@ def vizADXCobra(symbols, dfBase, dateWindow, dfSupportLines, dfResistanceLines, 
                 flaggedDate = datetime.datetime.strptime(flaggedDate, "%m/%d/%Y").timestamp() * 1000
                 flaggedPrice = dfMySymbols.loc[dfMySymbols['symbol']==symbol, 'flaggedPrice'].astype(float).values[0]
             
-                fig.add_trace(go.Scatter(x=[flaggedDate], y=[flaggedPrice],name='Flagged', mode='markers', marker=dict(color='Coral', size=20),showlegend=True))
+                fig.add_trace(go.Scatter(x=[flaggedDate], y=[flaggedPrice],name='Flagged', mode='markers', marker=dict(color='cyan', size=20),showlegend=True))
                 fig.update_layout(
                     paper_bgcolor='rgba(200,200,200,0.2)',
                     plot_bgcolor='rgba(200,200,200,0.2)'
@@ -173,7 +173,7 @@ def vizADXCobra(symbols, dfBase, dateWindow, dfSupportLines, dfResistanceLines, 
                 purchasedDate = datetime.datetime.strptime(purchasedDate, "%m/%d/%Y").timestamp() * 1000
                 purchasedPrice = dfMySymbols.loc[dfMySymbols['symbol']==symbol, 'purchasedPrice'].astype(float).values[0]
             
-                fig.add_trace(go.Scatter(x=[purchasedDate], y=[purchasedPrice],name='Purchase', mode='markers', marker=dict(color='LightSkyBlue', size=20),showlegend=True))
+                fig.add_trace(go.Scatter(x=[purchasedDate], y=[purchasedPrice],name='Purchase', mode='markers', marker=dict(color='chartreuse', size=20),showlegend=True))
                 fig.update_layout(
                     paper_bgcolor='rgba(200,200,200,0.2)',
                     plot_bgcolor='rgba(200,200,200,0.2)'

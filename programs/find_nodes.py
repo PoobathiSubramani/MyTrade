@@ -45,11 +45,6 @@ def findNodes(df, suggestedSymbols, filterParams={}):
         dfSymbolBottoms = dfSymbol.loc[dfSymbol['isBottom']==True] # temp df for only the bottom nodes
         dfSymbolTops = dfSymbol.loc[dfSymbol['isTop']==True] # temp df for only the top nodes
         for index in dfSymbol.index:
-            
-            fibMax = dfSymbol['High'].max()
-            fibMin = dfSymbol['Low'].min()
-
-            
 
             if not (dfSymbol.loc[index, 'isBottom']==True or dfSymbol.loc[index, 'isTop']==True):
                 continue # skip the rows that are neither top not bottom
@@ -88,11 +83,13 @@ def findNodes(df, suggestedSymbols, filterParams={}):
                 dfTempTop = dfSymbolTops.loc[(dfSymbolTops['High']>=topLowLimit) & (dfSymbolTops['High']<=topHighLimit)]
                 similarTops = dfTempTop.shape[0] # get the number of rows that meets the tolerance criteria  
                 avgHigh = dfTempTop['High'].mean() # get the avg high price for the criteria
+                minHigh, avgHigh = dfTempTop['High'].agg(['min','mean'])
                 startDate, endDate = dfTempTop['Date'].agg(['min','max']) # get the start and end date of the row(s) that meet the criteria    
                 
                 if similarTops > 0:
                     dfSymbol.loc[index, 'similarTops'] = similarTops
                     dfSymbol.loc[index, 'avgHigh'] = avgHigh
+                    dfSymbol.loc[index, 'minHigh'] = minHigh
                     dfSymbol.loc[index, 'startDate'] = startDate
                     dfSymbol.loc[index, 'endDate'] = endDate
                     dfSymbol.loc[index, 'age'] = (pd.to_datetime(today) - pd.to_datetime(endDate)).days # find the age of end date from today
