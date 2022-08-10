@@ -179,6 +179,22 @@ def vizADXCobra(symbols, dfBase, dateWindow, dfSupportLines, dfResistanceLines, 
                     plot_bgcolor='rgba(200,200,200,0.2)'
                 )
             
+            if actionType == 'sold':
+                purchasedDate = dfMySymbols.loc[dfMySymbols['symbol']==symbol, 'purchasedDate'].values[0]
+                purchasedDate = datetime.datetime.strptime(purchasedDate, "%m/%d/%Y").timestamp() * 1000
+                purchasedPrice = dfMySymbols.loc[dfMySymbols['symbol']==symbol, 'purchasedPrice'].astype(float).values[0] 
+
+                soldDate = dfMySymbols.loc[dfMySymbols['symbol']==symbol, 'soldDate'].values[0]
+                soldDate = datetime.datetime.strptime(soldDate, "%m/%d/%Y").timestamp() * 1000
+                soldPrice = dfMySymbols.loc[dfMySymbols['symbol']==symbol, 'soldPrice'].astype(float).values[0]
+            
+                fig.add_trace(go.Scatter(x=[purchasedDate], y=[purchasedPrice],name='Purchase', mode='markers', marker=dict(color='chartreuse', size=20),showlegend=True))
+                fig.add_trace(go.Scatter(x=[soldDate], y=[soldPrice],name='Sell', mode='markers', marker=dict(color='chocolate', size=20),showlegend=True))
+                fig.update_layout(
+                    paper_bgcolor='rgba(200,200,200,0.2)',
+                    plot_bgcolor='rgba(200,200,200,0.2)'
+                )
+            
 
         fig.show() # display the chart    
 

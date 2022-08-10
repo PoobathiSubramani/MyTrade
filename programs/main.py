@@ -122,7 +122,7 @@ def trackMySymbols(mySymbols, executionMode, dataPath, dateWindow, MADXCobraPara
     print(dfAnalysisSummary)
 
 
-analyzeAllSymbols(allSymbols=allSymbols, executionMode=executionMode, dataPath=dataPath, dateWindow=dateWindow, filterParams=filterParams, executionParams=executionParams)
+#analyzeAllSymbols(allSymbols=allSymbols, executionMode=executionMode, dataPath=dataPath, dateWindow=dateWindow, filterParams=filterParams, executionParams=executionParams)
 
 executionMode = executionModes[0] # set the execution mode to Start Over
 executionParams = {'mode':'Start Over', 'type':'track'}
