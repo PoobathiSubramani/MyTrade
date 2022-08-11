@@ -140,18 +140,22 @@ def vizADXCobra(symbols, dfBase, dateWindow, dfSupportLines, dfResistanceLines, 
 
         # add resistance lines
         for index, row in dfResistanceLines.loc[dfResistanceLines['symbol']==symbol].iterrows():
-            avgHigh = round(row['avgHigh'],2)
+            minHigh = row['minHigh']
+            if minHigh < latestHigh: # skip the resistance lines that are below the current High price
+                continue
             similarTops = int(row['similarTops'])
-            annotation_text = str(avgHigh) + ' with ' + str(similarTops) + ' times between ' + str(startDate) + ' and ' + str(endDate) + ' (' + str(row['rankTops']) + ')'
-            if avgHigh <= (latestHigh* (1+MADXCobraParams['resistnaceLimitPct']/100)): # ignore the lines that are 25% above the latest high
-                fig.add_hline(y=avgHigh, row=1, col=1, annotation_text=annotation_text, annotation_position='top left', line_color='orange', line_width=1)
+            annotation_text = str(minHigh) + ' with ' + str(similarTops) + ' times between ' + str(startDate) + ' and ' + str(endDate) 
+            if minHigh <= (latestHigh* (1+MADXCobraParams['resistnaceLimitPct']/100)): # ignore the lines that are 25% above the latest high
+                fig.add_hline(y=minHigh, row=1, col=1, annotation_text=annotation_text, annotation_position='top left', line_color='orange', line_width=1)
             
         for index, row in dfSupportLines.loc[dfSupportLines['symbol']==symbol].iterrows():
-            avgLow = round(row['avgLow'],2)
+            maxLow = row['maxLow']
+            if maxLow > latestLow: # skip the support lines that are above the current Low price
+                continue
             similarBottoms = row['similarBottoms']
-            annotation_text = str(avgLow) + ' with ' + str(similarBottoms) + ' times between ' + str(startDate) + ' and ' + str(endDate) + ' (' + str(row['rankBottoms']) + ')'
-            if avgLow >= (latestLow*(1-MADXCobraParams['supportLimitPct']/100)):
-                fig.add_hline(y=avgLow, row=1, col=1, annotation_text= annotation_text, annotation_position='top left', line_color='darkturquoise', line_width=1)
+            annotation_text = str(maxLow) + ' with ' + str(similarBottoms) + ' times between ' + str(startDate) + ' and ' + str(endDate) 
+            if maxLow >= (latestLow*(1-MADXCobraParams['supportLimitPct']/100)):
+                fig.add_hline(y=maxLow, row=1, col=1, annotation_text= annotation_text, annotation_position='top left', line_color='darkturquoise', line_width=1)
 
         fig.update(layout_xaxis_rangeslider_visible=False) # to turn off the range slider at the bottom of the chart
 

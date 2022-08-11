@@ -6,6 +6,28 @@ from numpy import int64
 import pandas as pd
 
 def getSRLines(df):
+    #filter only tops or bottoms
+    dfSupportLines = df.loc[df['similarBottoms']>0, ['symbol','Low', 'similarBottoms','maxLow']]
+    dfResistanceLines = df.loc[df['similarTops']>0, ['symbol','High', 'similarTops','minHigh']]
+
+    dfSupportLines = dfSupportLines.groupby(by=['symbol','maxLow']).agg({'similarBottoms':'max'})
+    dfSupportLines.reset_index(inplace=True)
+
+    dfResistanceLines = dfResistanceLines.groupby(by=['symbol','minHigh']).agg({'similarTops':'max'})
+    dfResistanceLines.reset_index(inplace=True)
+
+    
+    #sort minHigh by asc so that the lowest one appears first
+    dfResistanceLines = dfResistanceLines.sort_values(by=['symbol','minHigh'], ascending = [True, True])
+
+    #sort minHigh by asc so that the highest one appears first
+    dfSupportLines = dfSupportLines.sort_values(by=['symbol','maxLow'], ascending=[True, False])
+
+    return dfSupportLines, dfResistanceLines
+
+
+
+def getSRLines1(df):
     dfSupportLines = pd.DataFrame()
     dfResistanceLines = pd.DataFrame()
     for symbol in df['symbol'].unique():

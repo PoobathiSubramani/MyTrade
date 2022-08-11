@@ -34,7 +34,7 @@ filterParams = {
 executionParams = {'mode':'Start Over', 'type':'analyze'}
 
 executionModes = {0:'Start Over',1:'Reuse Data'}
-executionMode = executionModes[0]
+executionMode = executionModes[1]
 
 # select the date window for the data to be collected
 windowTypes = {0:"Custom Window",1:"ITD", 2:"YTD", 3:"MTD", 4:"WTD", 5:"Rolling 3 Months", 6:"Rolling 6 Months", 7:"Rolling 12 Months", 8:"Rolling 24 Months", 9:"MVG"}
@@ -64,6 +64,7 @@ dfAllSymbols = readSheet(sheetId=allSymbolsParams['sheetId'], sheetRange=allSymb
 allSymbols = dfAllSymbols['symbol'].to_list()
 #allSymbols = ['ASIANPAINT.NS', 'HDFC.NS', 'ICICIBANK.NS', 'ITC.NS', 'SBIN.NS', 'ULTRACEMCO.NS', 'ATGL.NS', 'BEL.NS', 'HAL.NS', 'INDHOTEL.NS', 'KAJARIACER.NS', 'NAVINFLUOR.NS', 'PAGEIND.NS', 'VINATIORGA.NS', 'WHIRLPOOL.NS']
 #allSymbols = ['ASIANPAINT.NS', 'HDFC.NS', 'ICICIBANK.NS', 'RECLTD.NS','AMARAJABAT.NS','EIHOTEL.NS']
+#allSymbols = ['ASIANPAINT.NS', 'HDFC.NS','FC.NS','IDFC.NS']
 
 dfMySymbols = readSheet(sheetId=mySymbolsParams['sheetId'], sheetRange=mySymbolsParams['sheetRange'], service=sheetService)
 mySymbols = dfMySymbols['symbol'].to_list()
@@ -76,6 +77,25 @@ for mySymbol in mySymbols: #remove instance of mySymbols from allSymbols
 
 print('all symbols: ',allSymbols)
 print('my symbols: ', mySymbols)
+
+def testRoutine(allSymbols, executionMode, dataPath, dateWindow, filterParams, executionParams):
+    dfRawTradeData = getTradedata(symbols=allSymbols, executionMode=executionMode, dataPath=dataPath, dateWindow=dateWindow, filterParams=filterParams, executionParams=executionParams)
+    print("Raw data collected:")
+    print(dfRawTradeData.head(10))
+
+    suggestedSymbols=['BPCL.NS','COALINDIA.NS']
+    dfNodes = findNodes(df=dfRawTradeData, suggestedSymbols=suggestedSymbols, filterParams=filterParams)
+    print(dfNodes)
+    print("Data with nodes - the turning points from low to high or high to low")
+    #print(dfNodes.sort_values(by=['symbol','scoreTops'], ascending=[True, False]).head(20))
+    
+    dfSupportLines, dfResistanceLines = getSRLines(df=dfNodes)
+    print("Support Line data")
+    print(dfSupportLines.head(10))
+    print("Resistance Line data")
+    print(dfResistanceLines.head(10))
+
+testRoutine(allSymbols, executionMode, dataPath, dateWindow, filterParams, executionParams)
 
 
 def analyzeAllSymbols(allSymbols, executionMode, dataPath, dateWindow, filterParams, executionParams):
@@ -95,7 +115,6 @@ def analyzeAllSymbols(allSymbols, executionMode, dataPath, dateWindow, filterPar
 
     dfNodes = findNodes(df=dfRawTradeData, suggestedSymbols=suggestedSymbols, filterParams=filterParams)
     print("Data with nodes - the turning points from low to high or high to low")
-    print(dfNodes.sort_values(by=['symbol','scoreTops'], ascending=[True, False]).head(20))
     
     dfSupportLines, dfResistanceLines = getSRLines(df=dfNodes)
     print("Support Line data")
@@ -121,9 +140,12 @@ def trackMySymbols(mySymbols, executionMode, dataPath, dateWindow, MADXCobraPara
     vizADXCobra(symbols=mySymbols, dfBase=dfPattern, dateWindow=dateWindow, dfSupportLines=dfSupportLines, dfResistanceLines=dfResistanceLines, MADXCobraParams=MADXCobraParams, executionParams=executionParams, dfMySymbols=dfMySymbols)
     print(dfAnalysisSummary)
 
+# calling analysis
+analyzeAllSymbols(allSymbols=allSymbols, executionMode=executionMode, dataPath=dataPath, dateWindow=dateWindow, filterParams=filterParams, executionParams=executionParams)
 
-#analyzeAllSymbols(allSymbols=allSymbols, executionMode=executionMode, dataPath=dataPath, dateWindow=dateWindow, filterParams=filterParams, executionParams=executionParams)
 
+# calling tracking
 executionMode = executionModes[0] # set the execution mode to Start Over
 executionParams = {'mode':'Start Over', 'type':'track'}
 trackMySymbols(mySymbols=mySymbols, executionMode=executionMode, dataPath=dataPath, dateWindow=dateWindow, MADXCobraParams=MADXCobraParams, executionParams=executionParams, dfMySymbols=dfMySymbols)
+

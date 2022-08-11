@@ -20,7 +20,7 @@ def getTradedata(symbols, executionMode, dataPath, dateWindow, filterParams, exe
         for symbol in symbols:
             dfSymbol = yf.download(symbol,start=startDate, end=endDate)
             print('Trade Data - raw:')
-            print(dfSymbol.tail(10))            
+            #print(dfSymbol.tail(10))            
             dfSymbol.reset_index(drop=False, inplace=True)
 
             latestHighPrice = dfSymbol.loc[dfSymbol.index[-1], 'High'] # used for skipping the unrequired symbols based on the filter conditions
@@ -33,7 +33,7 @@ def getTradedata(symbols, executionMode, dataPath, dateWindow, filterParams, exe
             dfSymbol.loc[:,'symbolRowNum'] = np.arange(start=0, stop=len(dfSymbol), step=1)
             
             print('Trade Data <=  Price ({}) :'.format(filterParams['maxPrice']))
-            print(dfSymbol.tail(10))
+            #print(dfSymbol.tail(10))
             
             tradeData = pd.concat([tradeData, dfSymbol],axis=0, ignore_index=True)
             print('Update: Geting the data for symbol {} from {} to {} is successful.'.format(symbol, dateWindow['startDate'], dateWindow['endDate']))

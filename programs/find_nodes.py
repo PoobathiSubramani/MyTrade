@@ -8,7 +8,69 @@ import numpy as np
 import pandas as pd
 import datetime
 
+
+from scipy import rand
+
 def findNodes(df, suggestedSymbols, filterParams={}):
+    print('update: finding the similar tops and bottoms for all the symbols is starting.')
+    today = datetime.date.today()
+    dfFinal = df.loc[:,['symbol', 'Date', 'High', 'Low']]
+    dfFinalTops = pd.DataFrame()
+    lineTolerancePct = filterParams['lineTolerancePct']
+
+    for symbol in suggestedSymbols: #iterate for each symbol
+        # find top and bottom nodes for the symbol in current iteration
+        dfSymbol = pd.DataFrame() #reset the dataframe for the symbol in current iteration
+        dfSymbol = df.loc[df['symbol']==symbol] #create a subset of the symbol in the current iteration
+        dfSymbol.reset_index(inplace=True, drop=True) # reset index 
+
+        latestHighPrice = dfSymbol.loc[dfSymbol.index[-1], 'High'] # used for skipping the unrequired symbols based on the filter conditions
+        if latestHighPrice > filterParams['maxPrice']:
+            continue #skip the symbols with price range beyond the price in the filter condition 
+
+        nodeCount = dfSymbol.shape[0] # get the total rows to find the relative position wrt to the current iteration in the loop
+
+        for index in dfSymbol.index: # find the reversal points
+            # when starting the iteration, there will not be a prev node. so, to give advantage to the current node, the following override helps
+            prevLow = float('inf') if index == 0 else dfSymbol.loc[index-1, 'Low'] #for the 1st node, set the prev node to hypothetical high
+            currLow = dfSymbol.loc[index, 'Low']
+            nextLow = float('inf') if index == nodeCount-1 else dfSymbol.loc[index+1, 'Low'] #for the last node, set the next node to hypothetical high
+
+            prevHigh = float('-inf') if index == 0 else dfSymbol.loc[index-1, 'High'] #for the 1st node, set the next node to hypothetical low
+            currHigh = dfSymbol.loc[index, 'High']
+            nextHigh = float('-inf') if index == nodeCount-1 else dfSymbol.loc[index+1, 'High'] #for the last node, set the next node to hypothetical low
+
+            dfSymbol.loc[index, 'isBottom'] = True if (currLow < prevLow and currLow < nextLow) else False # current node's low is lower than previoius and next node's low
+            dfSymbol.loc[index, 'isTop'] = True if (currHigh > prevHigh and currHigh > nextHigh) else False  # current node's high is higher than prev and next node's high
+
+        dfSymbolTops = dfSymbol.loc[dfSymbol['isTop']==True] # temp df for only the top nodes
+        dfSymbolBottoms = dfSymbol.loc[dfSymbol['isBottom']==True] # temp df for only the bottom nodes
+        
+        for index, row in dfSymbolTops.iterrows():
+            lowerLimitHigh = row['High']*(1-lineTolerancePct/100) #lower limit of High value, rounded to 1 decimal place
+            upperLimitHigh = row['High']*(1+lineTolerancePct/100) # upper limit of High value, rounded to 1 decimal place
+            dfTopsGrp = dfSymbolTops.loc[(dfSymbolTops['High']>=lowerLimitHigh) & (dfSymbolTops['High']<=upperLimitHigh)].groupby(by=['symbol'])
+            similarTops = dfTopsGrp.agg({'Date':'count'}).values[0][0] # aggregate produces dataframe, so access them using [] [] to get the value only.
+            minHigh = dfTopsGrp.agg({'High':'min'}).values[0][0] # aggregate produces dataframe, so access them using [] [] to get the value only.
+
+            #udpate tops in the final dataframe
+            dfFinal.loc[(dfFinal['symbol']==symbol)&(dfFinal['Date']==row['Date']),['similarTops', 'minHigh']]=[similarTops,round(minHigh,1)]
+        
+        for index, row in dfSymbolBottoms.iterrows():
+            lowerLimitLow = row['Low'] * (1-lineTolerancePct/100) # lower limit of Low value
+            upperLimitLow = row['Low']*(1+lineTolerancePct/100) # upper limit of Low value
+            dfBottomsGrp = dfSymbolBottoms.loc[(dfSymbolBottoms['Low']>=lowerLimitLow) & (dfSymbolBottoms['Low']<=upperLimitLow)].groupby(by=['symbol'])
+            similarBottoms = dfBottomsGrp.agg({'Date':'count'}).values[0][0]
+            maxLow = dfBottomsGrp.agg({'Low':'max'}).values[0][0]
+
+            #udpate tops in the final dataframe
+            dfFinal.loc[(dfFinal['symbol']==symbol)&(dfFinal['Date']==row['Date']),['similarBottoms', 'maxLow']]=[similarBottoms,round(maxLow,1)]
+    
+    return dfFinal
+
+
+
+def findNodes1(df, suggestedSymbols, filterParams={}):
     print('update: finding the similar tops and bottoms for all the symbols is starting.')
     today = datetime.date.today()
     dfFinal = pd.DataFrame()
