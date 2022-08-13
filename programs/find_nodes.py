@@ -13,9 +13,7 @@ from scipy import rand
 
 def findNodes(df, suggestedSymbols, filterParams={}):
     print('update: finding the similar tops and bottoms for all the symbols is starting.')
-    today = datetime.date.today()
     dfFinal = df.loc[:,['symbol', 'Date', 'High', 'Low']]
-    dfFinalTops = pd.DataFrame()
     lineTolerancePct = filterParams['lineTolerancePct']
 
     for symbol in suggestedSymbols: #iterate for each symbol
@@ -52,9 +50,11 @@ def findNodes(df, suggestedSymbols, filterParams={}):
             dfTopsGrp = dfSymbolTops.loc[(dfSymbolTops['High']>=lowerLimitHigh) & (dfSymbolTops['High']<=upperLimitHigh)].groupby(by=['symbol'])
             similarTops = dfTopsGrp.agg({'Date':'count'}).values[0][0] # aggregate produces dataframe, so access them using [] [] to get the value only.
             minHigh = dfTopsGrp.agg({'High':'min'}).values[0][0] # aggregate produces dataframe, so access them using [] [] to get the value only.
+            startDate = dfTopsGrp.agg({'Date':'min'}).values[0][0] # first occurance date of the value
+            endDate = dfTopsGrp.agg({'Date':'max'}).values[0][0] # last occurance date of the value
 
             #udpate tops in the final dataframe
-            dfFinal.loc[(dfFinal['symbol']==symbol)&(dfFinal['Date']==row['Date']),['similarTops', 'minHigh']]=[similarTops,round(minHigh,1)]
+            dfFinal.loc[(dfFinal['symbol']==symbol)&(dfFinal['Date']==row['Date']),['similarTops', 'minHigh', 'startDate', 'endDate']]=[similarTops,round(minHigh,1),startDate,endDate]
         
         for index, row in dfSymbolBottoms.iterrows():
             lowerLimitLow = row['Low'] * (1-lineTolerancePct/100) # lower limit of Low value
@@ -62,9 +62,11 @@ def findNodes(df, suggestedSymbols, filterParams={}):
             dfBottomsGrp = dfSymbolBottoms.loc[(dfSymbolBottoms['Low']>=lowerLimitLow) & (dfSymbolBottoms['Low']<=upperLimitLow)].groupby(by=['symbol'])
             similarBottoms = dfBottomsGrp.agg({'Date':'count'}).values[0][0]
             maxLow = dfBottomsGrp.agg({'Low':'max'}).values[0][0]
+            startDate = dfBottomsGrp.agg({'Date':'min'}).values[0][0] # first occurance date of the value
+            endDate = dfBottomsGrp.agg({'Date':'max'}).values[0][0] # last occurance date of the value           
 
             #udpate tops in the final dataframe
-            dfFinal.loc[(dfFinal['symbol']==symbol)&(dfFinal['Date']==row['Date']),['similarBottoms', 'maxLow']]=[similarBottoms,round(maxLow,1)]
+            dfFinal.loc[(dfFinal['symbol']==symbol)&(dfFinal['Date']==row['Date']),['similarBottoms', 'maxLow', 'startDate', 'endDate']]=[similarBottoms,round(maxLow,1),startDate,endDate]
     
     return dfFinal
 

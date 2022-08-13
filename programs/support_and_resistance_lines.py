@@ -7,13 +7,13 @@ import pandas as pd
 
 def getSRLines(df):
     #filter only tops or bottoms
-    dfSupportLines = df.loc[df['similarBottoms']>0, ['symbol','Low', 'similarBottoms','maxLow']]
-    dfResistanceLines = df.loc[df['similarTops']>0, ['symbol','High', 'similarTops','minHigh']]
+    dfSupportLines = df.loc[df['similarBottoms']>0, ['symbol','Low', 'similarBottoms','maxLow','startDate','endDate']]
+    dfResistanceLines = df.loc[df['similarTops']>0, ['symbol','High', 'similarTops','minHigh','startDate','endDate']]
 
-    dfSupportLines = dfSupportLines.groupby(by=['symbol','maxLow']).agg({'similarBottoms':'max'})
+    dfSupportLines = dfSupportLines.groupby(by=['symbol','maxLow','startDate','endDate']).agg({'similarBottoms':'max'})
     dfSupportLines.reset_index(inplace=True)
 
-    dfResistanceLines = dfResistanceLines.groupby(by=['symbol','minHigh']).agg({'similarTops':'max'})
+    dfResistanceLines = dfResistanceLines.groupby(by=['symbol','minHigh','startDate','endDate']).agg({'similarTops':'max'})
     dfResistanceLines.reset_index(inplace=True)
 
     

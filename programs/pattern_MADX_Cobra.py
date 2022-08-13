@@ -31,7 +31,7 @@ def MADXCobra(df, params):
         dfSymbol = df.loc[df['symbol']==symbol] # create dataset for the current symbol
         maxIndex = dfSymbol.index.max() # get the latest row in the current symbol dataset
         latestLow = dfSymbol.loc[maxIndex, 'Low']
-        latestHigh = dfSymbol.loc[maxIndex, 'High']
+        
 
         # get the values as per the MADX Cobra strategy
         emaLow = ta.EMA(dfSymbol['Low'], timeperiod=params['emaTimePeriod'])

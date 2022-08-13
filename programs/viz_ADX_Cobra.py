@@ -5,10 +5,10 @@ This visualization will show the chart with the following
 3. ADX, ADXR
 """
 from __future__ import annotations
-from re import X
-from tkinter import Y
-from turtle import color, width
-from numpy import size
+#from re import X
+#from tkinter import Y
+#from turtle import color, width
+#from numpy import size
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 import pandas as pd
@@ -144,16 +144,18 @@ def vizADXCobra(symbols, dfBase, dateWindow, dfSupportLines, dfResistanceLines, 
             if minHigh < latestHigh: # skip the resistance lines that are below the current High price
                 continue
             similarTops = int(row['similarTops'])
-            annotation_text = str(minHigh) + ' with ' + str(similarTops) + ' times between ' + str(startDate) + ' and ' + str(endDate) 
+            dateText = 'on ' + row['startDate'].strftime('%m/%d/%Y') if row['startDate'] == row['endDate'] else 'between ' + row['startDate'].strftime('%m/%d/%Y') + ' and ' + row['endDate'].strftime('%m/%d/%Y')
+            annotation_text = str(minHigh) + ' with ' + str(similarTops) + ' times ' + dateText
             if minHigh <= (latestHigh* (1+MADXCobraParams['resistnaceLimitPct']/100)): # ignore the lines that are 25% above the latest high
-                fig.add_hline(y=minHigh, row=1, col=1, annotation_text=annotation_text, annotation_position='top left', line_color='orange', line_width=1)
+                fig.add_hline(y=minHigh, row=1, col=1, annotation_text=annotation_text, annotation_position='top left', line_color='orange', line_width=0.5)
             
         for index, row in dfSupportLines.loc[dfSupportLines['symbol']==symbol].iterrows():
             maxLow = row['maxLow']
             if maxLow > latestLow: # skip the support lines that are above the current Low price
                 continue
-            similarBottoms = row['similarBottoms']
-            annotation_text = str(maxLow) + ' with ' + str(similarBottoms) + ' times between ' + str(startDate) + ' and ' + str(endDate) 
+            similarBottoms = int(row['similarBottoms'])
+            dateText = 'on ' + row['startDate'].strftime('%m/%d/%Y') if row['startDate'] == row['endDate'] else 'between ' + row['startDate'].strftime('%m/%d/%Y') + ' and ' + row['endDate'].strftime('%m/%d/%Y')
+            annotation_text = str(maxLow) + ' with ' + str(similarBottoms) + ' times ' + dateText 
             if maxLow >= (latestLow*(1-MADXCobraParams['supportLimitPct']/100)):
                 fig.add_hline(y=maxLow, row=1, col=1, annotation_text= annotation_text, annotation_position='top left', line_color='darkturquoise', line_width=1)
 

@@ -1,8 +1,6 @@
 """
 this program does analysis on the input dataset to find symbols that can be pursued
 """
-
-from operator import index
 import pandas as pd
 import datetime 
 

@@ -1,5 +1,4 @@
-from calendar import month
-from datetime import date
+
 import yfinance as yf
 import pandas as pd
 import numpy as np

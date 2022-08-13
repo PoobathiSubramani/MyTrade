@@ -10,14 +10,12 @@ from programs.pattern_MADX_Cobra import MADXCobra
 from programs.analysis import analyze
 from programs.gSheets import getSheetService, readSheet
 
-import pandas as pd
-
 # variables
 dataPath = '/Users/boopathi/Experiments/myTrade/data/'
 googleCredsPath = '/Users/boopathi/Experiments/myTrade/keys/credentials.json' #the path where the credentials downloaded from google sheets API
 allSymbolsParams = {
     'sheetId':'1XoVUOt6cV5iVj8Ma5nHjkCZoWZTiJYjQI8miv4k3R-I', #get this from the share-link of the sheet
-    'sheetRange': 'symbolsList!A:C' # range from the sheet, which contains information
+    'sheetRange': 'symbolsList!A:A' # range from the sheet, which contains information
     }
 mySymbolsParams = {
     'sheetId':'16nJ1pC3cvFzF69zUnnaElFS0U7Rk4Pw1LAbsSzPUfyM', #get this from the share-link of the sheet
@@ -34,7 +32,7 @@ filterParams = {
 executionParams = {'mode':'Start Over', 'type':'analyze'}
 
 executionModes = {0:'Start Over',1:'Reuse Data'}
-executionMode = executionModes[1]
+executionMode = executionModes[0]
 
 # select the date window for the data to be collected
 windowTypes = {0:"Custom Window",1:"ITD", 2:"YTD", 3:"MTD", 4:"WTD", 5:"Rolling 3 Months", 6:"Rolling 6 Months", 7:"Rolling 12 Months", 8:"Rolling 24 Months", 9:"MVG"}
@@ -67,6 +65,7 @@ allSymbols = dfAllSymbols['symbol'].to_list()
 #allSymbols = ['ASIANPAINT.NS', 'HDFC.NS','FC.NS','IDFC.NS']
 
 dfMySymbols = readSheet(sheetId=mySymbolsParams['sheetId'], sheetRange=mySymbolsParams['sheetRange'], service=sheetService)
+dfMySymbols = dfMySymbols.loc[dfMySymbols['activeInd']=='active'] # get only the 'active' marked symbols.
 mySymbols = dfMySymbols['symbol'].to_list()
 
 for mySymbol in mySymbols: #remove instance of mySymbols from allSymbols
@@ -95,7 +94,7 @@ def testRoutine(allSymbols, executionMode, dataPath, dateWindow, filterParams, e
     print("Resistance Line data")
     print(dfResistanceLines.head(10))
 
-testRoutine(allSymbols, executionMode, dataPath, dateWindow, filterParams, executionParams)
+#testRoutine(allSymbols, executionMode, dataPath, dateWindow, filterParams, executionParams)
 
 
 def analyzeAllSymbols(allSymbols, executionMode, dataPath, dateWindow, filterParams, executionParams):
