@@ -15,7 +15,7 @@ dataPath = '/Users/boopathi/Experiments/myTrade/data/'
 googleCredsPath = '/Users/boopathi/Experiments/myTrade/keys/credentials.json' #the path where the credentials downloaded from google sheets API
 allSymbolsParams = {
     'sheetId':'1XoVUOt6cV5iVj8Ma5nHjkCZoWZTiJYjQI8miv4k3R-I', #get this from the share-link of the sheet
-    'sheetRange': 'symbolsList!A:A' # range from the sheet, which contains information
+    'sheetRange': 'symbolsList!A:C' # range from the sheet, which contains information
     }
 mySymbolsParams = {
     'sheetId':'16nJ1pC3cvFzF69zUnnaElFS0U7Rk4Pw1LAbsSzPUfyM', #get this from the share-link of the sheet
@@ -25,14 +25,14 @@ mySymbolsParams = {
 filterParams = {
     'lineTolerancePct':1,
     'minPrice':0,
-    'maxPrice':500
+    'maxPrice':200
 }    
 
 # execution mode
 executionParams = {'mode':'Start Over', 'type':'analyze'}
 
 executionModes = {0:'Start Over',1:'Reuse Data'}
-executionMode = executionModes[0]
+executionMode = executionModes[1]
 
 # select the date window for the data to be collected
 windowTypes = {0:"Custom Window",1:"ITD", 2:"YTD", 3:"MTD", 4:"WTD", 5:"Rolling 3 Months", 6:"Rolling 6 Months", 7:"Rolling 12 Months", 8:"Rolling 24 Months", 9:"MVG"}
@@ -58,11 +58,12 @@ MADXCobraParams = {
 # get the stocks list 
 sheetService = getSheetService(credsPath=googleCredsPath)
 dfAllSymbols = readSheet(sheetId=allSymbolsParams['sheetId'], sheetRange=allSymbolsParams['sheetRange'], service=sheetService)
-#dfAllSymbols = dfAllSymbols.loc[dfAllSymbols['category']=='Nifty 150']
+dfAllSymbols = dfAllSymbols.loc[dfAllSymbols['series']=='EQ']
 allSymbols = dfAllSymbols['symbol'].to_list()
+
 #allSymbols = ['ASIANPAINT.NS', 'HDFC.NS', 'ICICIBANK.NS', 'ITC.NS', 'SBIN.NS', 'ULTRACEMCO.NS', 'ATGL.NS', 'BEL.NS', 'HAL.NS', 'INDHOTEL.NS', 'KAJARIACER.NS', 'NAVINFLUOR.NS', 'PAGEIND.NS', 'VINATIORGA.NS', 'WHIRLPOOL.NS']
 #allSymbols = ['ASIANPAINT.NS', 'HDFC.NS', 'ICICIBANK.NS', 'RECLTD.NS','AMARAJABAT.NS','EIHOTEL.NS']
-#allSymbols = ['ASIANPAINT.NS', 'HDFC.NS','FC.NS','IDFC.NS']
+#allSymbols = ['ZUARIIND.NS']
 
 dfMySymbols = readSheet(sheetId=mySymbolsParams['sheetId'], sheetRange=mySymbolsParams['sheetRange'], service=sheetService)
 dfMySymbols = dfMySymbols.loc[dfMySymbols['activeInd']=='active'] # get only the 'active' marked symbols.
@@ -97,10 +98,12 @@ def testRoutine(allSymbols, executionMode, dataPath, dateWindow, filterParams, e
 #testRoutine(allSymbols, executionMode, dataPath, dateWindow, filterParams, executionParams)
 
 
-def analyzeAllSymbols(allSymbols, executionMode, dataPath, dateWindow, filterParams, executionParams):
+def analyzeAllSymbols(allSymbols, executionMode, dataPath, dateWindow, filterParams, executionParams, dfAllSymbols):
     dfRawTradeData = getTradedata(symbols=allSymbols, executionMode=executionMode, dataPath=dataPath, dateWindow=dateWindow, filterParams=filterParams, executionParams=executionParams)
     print("Raw data collected:")
     print(dfRawTradeData.head(10))
+
+    #dfRawTradeData = dfRawTradeData.loc[dfRawTradeData['symbol']=='ZUARIIND.NS']
 
     dfPattern = MADXCobra(dfRawTradeData, params=MADXCobraParams)
     print('Pattern Data (tail sample):')
@@ -122,10 +125,10 @@ def analyzeAllSymbols(allSymbols, executionMode, dataPath, dateWindow, filterPar
     print(dfResistanceLines.head(10))
     
     print("Visualizing data... ")
-    vizADXCobra(symbols=suggestedSymbols, dfBase=dfPattern, dateWindow=dateWindow, dfSupportLines=dfSupportLines, dfResistanceLines=dfResistanceLines, MADXCobraParams=MADXCobraParams, executionParams=executionParams)
+    vizADXCobra(symbols=suggestedSymbols, dfBase=dfPattern, dateWindow=dateWindow, dfSupportLines=dfSupportLines, dfResistanceLines=dfResistanceLines, MADXCobraParams=MADXCobraParams, executionParams=executionParams, dfAllSymbols=dfAllSymbols)
     #return dfSupportLines, dfResistanceLines
 
-def trackMySymbols(mySymbols, executionMode, dataPath, dateWindow, MADXCobraParams, executionParams, dfMySymbols):
+def trackMySymbols(mySymbols, executionMode, dataPath, dateWindow, MADXCobraParams, executionParams, dfMySymbols, dfAllSymbols):
     filterParams = {
     'lineTolerancePct':1,
     'minPrice':0,
@@ -136,15 +139,15 @@ def trackMySymbols(mySymbols, executionMode, dataPath, dateWindow, MADXCobraPara
     dfAnalysisSummary = analyze(dfPattern, MADXCobraParams=MADXCobraParams, filterParams=filterParams)
     dfNodes = findNodes(df=dfRawTradeData, suggestedSymbols=mySymbols, filterParams=filterParams)
     dfSupportLines, dfResistanceLines = getSRLines(df=dfNodes)
-    vizADXCobra(symbols=mySymbols, dfBase=dfPattern, dateWindow=dateWindow, dfSupportLines=dfSupportLines, dfResistanceLines=dfResistanceLines, MADXCobraParams=MADXCobraParams, executionParams=executionParams, dfMySymbols=dfMySymbols)
+    vizADXCobra(symbols=mySymbols, dfBase=dfPattern, dateWindow=dateWindow, dfSupportLines=dfSupportLines, dfResistanceLines=dfResistanceLines, MADXCobraParams=MADXCobraParams, executionParams=executionParams, dfMySymbols=dfMySymbols, dfAllSymbols=dfAllSymbols)
     print(dfAnalysisSummary)
 
 # calling analysis
-analyzeAllSymbols(allSymbols=allSymbols, executionMode=executionMode, dataPath=dataPath, dateWindow=dateWindow, filterParams=filterParams, executionParams=executionParams)
+analyzeAllSymbols(allSymbols=allSymbols, executionMode=executionMode, dataPath=dataPath, dateWindow=dateWindow, filterParams=filterParams, executionParams=executionParams, dfAllSymbols=dfAllSymbols)
 
 
 # calling tracking
 executionMode = executionModes[0] # set the execution mode to Start Over
 executionParams = {'mode':'Start Over', 'type':'track'}
-trackMySymbols(mySymbols=mySymbols, executionMode=executionMode, dataPath=dataPath, dateWindow=dateWindow, MADXCobraParams=MADXCobraParams, executionParams=executionParams, dfMySymbols=dfMySymbols)
+trackMySymbols(mySymbols=mySymbols, executionMode=executionMode, dataPath=dataPath, dateWindow=dateWindow, MADXCobraParams=MADXCobraParams, executionParams=executionParams, dfMySymbols=dfMySymbols, dfAllSymbols=dfAllSymbols)
 

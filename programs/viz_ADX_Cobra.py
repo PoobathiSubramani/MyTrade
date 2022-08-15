@@ -14,7 +14,7 @@ from plotly.subplots import make_subplots
 import pandas as pd
 import datetime
 
-def vizADXCobra(symbols, dfBase, dateWindow, dfSupportLines, dfResistanceLines, MADXCobraParams, executionParams, dfMySymbols=pd.DataFrame()):
+def vizADXCobra(symbols, dfBase, dateWindow, dfSupportLines, dfResistanceLines, MADXCobraParams, executionParams, dfMySymbols=pd.DataFrame(), dfAllSymbols=pd.DataFrame()):
 
     if (len(symbols) == 0): #if there are no symbols that met the conditions, display a message and return
         fig = go.Figure()
@@ -46,6 +46,7 @@ def vizADXCobra(symbols, dfBase, dateWindow, dfSupportLines, dfResistanceLines, 
         latestHigh = dfSymbol['High'][dfSymbol.index[-1]] #the most recent high price
         latestLow = dfSymbol['Low'][dfSymbol.index[-1]] #the most recent low price
 
+        companyName = dfAllSymbols.loc[dfAllSymbols['symbol']==symbol, 'company'].values[0] # get the company name
 
         candlesticks = go.Candlestick( # draw candlesticks
             x=dfSymbol['Date'],
@@ -131,7 +132,7 @@ def vizADXCobra(symbols, dfBase, dateWindow, dfSupportLines, dfResistanceLines, 
 
         fig.update_layout( # to update the chart title with date window information
             title=go.layout.Title(
-                text = symbol + "<br><sup>" + windowType + ": " + startDate.strftime("%Y/%m/%d") + " to " + endDate.strftime("%Y/%m/%d") + "</sup>",
+                text = symbol + "<br><sup>" + companyName + "<br><sup>" + windowType + ": " + startDate.strftime("%Y/%m/%d") + " to " + endDate.strftime("%Y/%m/%d") + "</sup>",
                 xref = "paper", 
                 x=0)
             )
