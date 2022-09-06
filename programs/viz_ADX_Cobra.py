@@ -106,11 +106,11 @@ def vizADXCobra(symbols, dfBase, dateWindow, dfSupportLines, dfResistanceLines, 
             name='ADX',
             line = dict(color='green', width=1)
         )        
-        ADXR = go.Scatter(
+        RSI = go.Scatter(
             x=dfSymbol['Date'],
-            y=dfSymbol['ADXR'],
+            y=dfSymbol['RSI'],
             mode='lines',
-            name='ADXR',
+            name='RSI',
             line = dict(color='blue', width=1)
         )            
 
@@ -128,17 +128,13 @@ def vizADXCobra(symbols, dfBase, dateWindow, dfSupportLines, dfResistanceLines, 
         fig.add_trace(EMA_low)
 
         fig.add_trace(ADX, row=2, col=1)
-        #fig.add_trace(ADXR, row=2, col=1)
+        fig.add_trace(RSI, row=2, col=1)
 
-        fig.update_layout( # to update the chart title with date window information
-            title=go.layout.Title(
-                text = symbol + "<br><sup>" + companyName + "<br><sup>" + windowType + ": " + startDate.strftime("%Y/%m/%d") + " to " + endDate.strftime("%Y/%m/%d") + "</sup>",
-                xref = "paper", 
-                x=0)
-            )
-        fig.add_hline(y=adxLowerLimit, line_dash='dot', row=2, col=1, annotation_text='Lower Limit - '+str(adxLowerLimit), annotation_position="bottom right", line_color='grey', line_width=1)
-        fig.add_hline(y=adxUpperLimit, line_dash='dot', row=2, col=1, annotation_text='Upper Limit - '+str(adxUpperLimit), annotation_position="bottom right", line_color='grey', line_width=1)
+        fig.add_hline(y=adxLowerLimit, line_dash='dot', row=2, col=1, annotation_text='ADX Lower Limit - '+str(adxLowerLimit), annotation_position="bottom right", line_color='grey', line_width=1)
+        fig.add_hline(y=adxUpperLimit, line_dash='dot', row=2, col=1, annotation_text='ADX Upper Limit - '+str(adxUpperLimit), annotation_position="bottom right", line_color='grey', line_width=1)
 
+        #fig.update_layout(yaxis=dict(side='right'))    # to display the y axis on the right side
+        
         # add resistance lines
         for index, row in dfResistanceLines.loc[dfResistanceLines['symbol']==symbol].iterrows():
             minHigh = row['minHigh']
@@ -201,7 +197,13 @@ def vizADXCobra(symbols, dfBase, dateWindow, dfSupportLines, dfResistanceLines, 
                     paper_bgcolor='rgba(200,200,200,0.2)',
                     plot_bgcolor='rgba(200,200,200,0.2)'
                 )
-            
+        fig.update_layout( # to update the chart title with date window information
+            title=go.layout.Title(
+                text = symbol + "<br><sup>" + companyName + "<br><sup>" + windowType + ": " + startDate.strftime("%Y/%m/%d") + " to " + endDate.strftime("%Y/%m/%d") + "</sup>",
+                xref = "paper",
+                x=0)
+            )
+        fig.update_layout(yaxis=dict(side='right'))    # to display the y axis on the right side
 
         fig.show() # display the chart    
 

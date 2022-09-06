@@ -41,7 +41,8 @@ def MADXCobra(df, params):
         smaHigh = ta.SMA(dfSymbol['High'], timeperiod=params['smaTimePeriod'])
         smaHLC3 = ta.SMA((dfSymbol['High']+dfSymbol['Low']+dfSymbol['Close'])/3, timeperiod=params['smaTimePeriod'])          
         adx = ta.ADX(dfSymbol['High'],dfSymbol['Low'],dfSymbol['Close'], timeperiod=params['adxTimePeriod'])
-        adxr = ta.ADXR(dfSymbol['High'],dfSymbol['Low'],dfSymbol['Close'], timeperiod=params['adxTimePeriod'])        
+        adxr = ta.ADXR(dfSymbol['High'],dfSymbol['Low'],dfSymbol['Close'], timeperiod=params['adxTimePeriod'])   
+        rsi = ta.RSI(dfSymbol['Close'], timeperiod=14)     
 
         # add the values as columns in the dataframe
         dfSymbol['EMAlow']=emaLow
@@ -52,6 +53,7 @@ def MADXCobra(df, params):
         dfSymbol['SMAhlc3']=smaHLC3    
         dfSymbol['ADX']=adx
         dfSymbol['ADXR']=adxr
+        dfSymbol['RSI']=rsi
         
         # conditions for action
         dfSymbol.loc[maxIndex, 'action'] = 'buy' if (latestLow > dfSymbol.loc[maxIndex, 'EMAhigh']  # above the SMA High

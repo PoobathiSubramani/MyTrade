@@ -17,8 +17,13 @@ def getTradedata(symbols, executionMode, dataPath, dateWindow, filterParams, exe
     # get the trade data for the symbols
     if executionMode == 'Start Over':
         for symbol in symbols:
-            dfSymbol = yf.download(symbol,start=startDate, end=endDate)
-            print('Trade Data - raw:')
+            try:
+                dfSymbol = yf.download(symbol,start=startDate, end=endDate)
+                print('Got data for symbol - {}'.format(symbol))
+            except:
+                print('Attempt to get trade data for the symbol {} is failed. Please check.'.format(symbol))
+                continue
+            
             #print(dfSymbol.tail(10))            
             dfSymbol.reset_index(drop=False, inplace=True)
 
@@ -28,10 +33,9 @@ def getTradedata(symbols, executionMode, dataPath, dateWindow, filterParams, exe
             
             dfSymbol['symbol']=symbol
             dfSymbol = dfSymbol[tradeDataColumns]
-            #dfSymbol['symbolRowNum'] = np.arange(start=0, stop=len(dfSymbol), step=1)
             dfSymbol.loc[:,'symbolRowNum'] = np.arange(start=0, stop=len(dfSymbol), step=1)
             
-            print('Trade Data <=  Price ({}) :'.format(filterParams['maxPrice']))
+            print('Trade Data <=  Price ({}) .'.format(filterParams['maxPrice']))
             #print(dfSymbol.tail(10))
             
             tradeData = pd.concat([tradeData, dfSymbol],axis=0, ignore_index=True)

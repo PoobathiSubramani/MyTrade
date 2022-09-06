@@ -9,6 +9,7 @@ from programs.viz_ADX_Cobra import vizADXCobra
 from programs.pattern_MADX_Cobra import MADXCobra
 from programs.analysis import analyze
 from programs.gSheets import getSheetService, readSheet
+#122369727390482-384-230492-93402903492490283904829038490283490823-94823-482-384-203842-34923-940-2930492-3490293423-49-23940-293423-0490-23940-2934230490-2394029340923-4092-3094-023940293-49230940-293423-492-394-2394-02349-0
 
 # variables
 dataPath = '/Users/boopathi/Experiments/myTrade/data/'
@@ -19,7 +20,7 @@ allSymbolsParams = {
     }
 mySymbolsParams = {
     'sheetId':'16nJ1pC3cvFzF69zUnnaElFS0U7Rk4Pw1LAbsSzPUfyM', #get this from the share-link of the sheet
-    'sheetRange': 'mySymbolsList!A:M' # range from the sheet, which contains information
+    'sheetRange': 'mySymbolsList!A:U' # range from the sheet, which contains information
     }
 
 filterParams = {
@@ -32,7 +33,7 @@ filterParams = {
 executionParams = {'mode':'Start Over', 'type':'analyze'}
 
 executionModes = {0:'Start Over',1:'Reuse Data'}
-executionMode = executionModes[1]
+executionMode = executionModes[0]
 
 # select the date window for the data to be collected
 windowTypes = {0:"Custom Window",1:"ITD", 2:"YTD", 3:"MTD", 4:"WTD", 5:"Rolling 3 Months", 6:"Rolling 6 Months", 7:"Rolling 12 Months", 8:"Rolling 24 Months", 9:"MVG"}
@@ -63,11 +64,13 @@ allSymbols = dfAllSymbols['symbol'].to_list()
 
 #allSymbols = ['ASIANPAINT.NS', 'HDFC.NS', 'ICICIBANK.NS', 'ITC.NS', 'SBIN.NS', 'ULTRACEMCO.NS', 'ATGL.NS', 'BEL.NS', 'HAL.NS', 'INDHOTEL.NS', 'KAJARIACER.NS', 'NAVINFLUOR.NS', 'PAGEIND.NS', 'VINATIORGA.NS', 'WHIRLPOOL.NS']
 #allSymbols = ['ASIANPAINT.NS', 'HDFC.NS', 'ICICIBANK.NS', 'RECLTD.NS','AMARAJABAT.NS','EIHOTEL.NS']
-#allSymbols = ['ZUARIIND.NS']
+allSymbols = ['AKG.NS']
 
 dfMySymbols = readSheet(sheetId=mySymbolsParams['sheetId'], sheetRange=mySymbolsParams['sheetRange'], service=sheetService)
 dfMySymbols = dfMySymbols.loc[dfMySymbols['activeInd']=='active'] # get only the 'active' marked symbols.
+dfMySymbols.sort_values(by=['actionType','symbol'], inplace=True)
 mySymbols = dfMySymbols['symbol'].to_list()
+mySymbols = ['MAXIND.NS']
 
 for mySymbol in mySymbols: #remove instance of mySymbols from allSymbols
     try:
@@ -151,3 +154,4 @@ executionMode = executionModes[0] # set the execution mode to Start Over
 executionParams = {'mode':'Start Over', 'type':'track'}
 trackMySymbols(mySymbols=mySymbols, executionMode=executionMode, dataPath=dataPath, dateWindow=dateWindow, MADXCobraParams=MADXCobraParams, executionParams=executionParams, dfMySymbols=dfMySymbols, dfAllSymbols=dfAllSymbols)
 
+ 
